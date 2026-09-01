@@ -339,6 +339,58 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["dog_matches"]["Insert"]>;
         Relationships: Relationship[];
       };
+      playdates: {
+        Row: {
+          id: string;
+          host_dog_id: string;
+          title: string;
+          starts_at: string;
+          ends_at: string | null;
+          city: string;
+          location_label: string;
+          meeting_point: unknown;
+          notes: string | null;
+          status: "scheduled" | "cancelled" | "completed";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          host_dog_id: string;
+          title: string;
+          starts_at: string;
+          ends_at?: string | null;
+          city: string;
+          location_label: string;
+          meeting_point?: unknown;
+          notes?: string | null;
+          status?: "scheduled" | "cancelled" | "completed";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["playdates"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      playdate_participants: {
+        Row: {
+          id: string;
+          playdate_id: string;
+          dog_id: string;
+          status: "invited" | "accepted" | "declined";
+          invited_at: string;
+          responded_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          playdate_id: string;
+          dog_id: string;
+          status?: "invited" | "accepted" | "declined";
+          invited_at?: string;
+          responded_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["playdate_participants"]["Insert"]>;
+        Relationships: Relationship[];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -421,8 +473,17 @@ export type DogMatchAction =
   Database["public"]["Tables"]["dog_match_actions"]["Row"];
 export type DogMatch =
   Database["public"]["Tables"]["dog_matches"]["Row"];
+export type Playdate =
+  Database["public"]["Tables"]["playdates"]["Row"];
+export type PlaydateParticipant =
+  Database["public"]["Tables"]["playdate_participants"]["Row"];
 
 export type DogWithPhoto = Dog & { photo_url: string | null };
+
+export type PlaydateWithDetails = Playdate & {
+  host_dog: DogWithPhoto;
+  participants: (PlaydateParticipant & { dog: DogWithPhoto })[];
+};
 
 export type MatchCandidateDog = DogWithPhoto & {
   compatibility_score: number;
