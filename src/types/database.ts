@@ -277,6 +277,68 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["dog_locations"]["Insert"]>;
         Relationships: Relationship[];
       };
+      dog_match_preferences: {
+        Row: {
+          dog_id: string;
+          enabled: boolean;
+          min_distance_km: number;
+          max_distance_km: number;
+          preferred_sizes: string[];
+          preferred_energy_levels: string[];
+          preferred_sociability: string[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          dog_id: string;
+          enabled?: boolean;
+          min_distance_km?: number;
+          max_distance_km?: number;
+          preferred_sizes?: string[];
+          preferred_energy_levels?: string[];
+          preferred_sociability?: string[];
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["dog_match_preferences"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      dog_match_actions: {
+        Row: {
+          id: string;
+          from_dog_id: string;
+          to_dog_id: string;
+          action: "like" | "pass";
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          from_dog_id: string;
+          to_dog_id: string;
+          action: "like" | "pass";
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["dog_match_actions"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      dog_matches: {
+        Row: {
+          id: string;
+          dog_a_id: string;
+          dog_b_id: string;
+          matched_at: string;
+          status: "active" | "archived" | "unmatched";
+        };
+        Insert: {
+          id?: string;
+          dog_a_id: string;
+          dog_b_id: string;
+          matched_at?: string;
+          status?: "active" | "archived" | "unmatched";
+        };
+        Update: Partial<Database["public"]["Tables"]["dog_matches"]["Insert"]>;
+        Relationships: Relationship[];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -353,8 +415,20 @@ export type DogFriendship =
   Database["public"]["Tables"]["dog_friendships"]["Row"];
 export type DogLocation =
   Database["public"]["Tables"]["dog_locations"]["Row"];
+export type DogMatchPreferences =
+  Database["public"]["Tables"]["dog_match_preferences"]["Row"];
+export type DogMatchAction =
+  Database["public"]["Tables"]["dog_match_actions"]["Row"];
+export type DogMatch =
+  Database["public"]["Tables"]["dog_matches"]["Row"];
 
 export type DogWithPhoto = Dog & { photo_url: string | null };
+
+export type MatchCandidateDog = DogWithPhoto & {
+  compatibility_score: number;
+  approx_distance_km?: number;
+  is_mutual_match?: boolean;
+};
 
 export type NearbyDog = {
   dog_id: string;
