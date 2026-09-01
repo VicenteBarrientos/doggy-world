@@ -1,5 +1,4 @@
 import { FlaskConical, UserPlus } from "lucide-react";
-import Link from "next/link";
 
 import { es } from "@/lib/i18n/es";
 
@@ -14,13 +13,15 @@ export function DemoBanner() {
             {es.demo.description}
           </span>
         </span>
-        <Link
-          href="/demo/exit"
-          className="ml-4 flex shrink-0 items-center gap-1.5 border-2 border-ink bg-white px-3 py-1 font-display text-[10px] uppercase tracking-wide text-ink shadow-[2px_2px_0_var(--ink)] transition hover:bg-ink hover:text-white sm:text-xs"
-        >
-          <UserPlus size={13} aria-hidden="true" />
-          {es.demo.exit}
-        </Link>
+        <form action="/demo/exit" method="post" className="ml-4 shrink-0">
+          <button
+            type="submit"
+            className="flex items-center gap-1.5 border-2 border-ink bg-white px-3 py-1 font-display text-[10px] uppercase tracking-wide text-ink shadow-[2px_2px_0_var(--ink)] transition hover:bg-ink hover:text-white sm:text-xs"
+          >
+            <UserPlus size={13} aria-hidden="true" />
+            {es.demo.exit}
+          </button>
+        </form>
       </div>
     </div>
   );
