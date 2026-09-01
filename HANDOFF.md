@@ -230,6 +230,35 @@ When `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set:
 
 ---
 
+## Closed Beta Launch & Mobile Hardening (Completed & Live)
+
+- **Status:** **Ready for 5–10 Human Beta Testers**
+- **Mobile Photo Pipeline (`src/lib/client-photo.ts`):**
+  - Procesamiento 100% en el cliente de fotos de alta resolución (cámaras de 48 MP):
+    - Escala proporcional automática con límite de 1800 px en el lado mayor.
+    - Corrección nativa de orientación EXIF (`createImageBitmap(file, { imageOrientation: 'from-image' })` y fallback en Canvas 2D).
+    - Compresión inteligente a JPEG (calidad 0.85) manteniendo el archivo final típicamente entre 200 KB y 800 KB (muy por debajo del límite de 1.5 MB deseado y de los 3 MB de Supabase).
+  - Manejo de HEIC / HEIF: detección nativa en Safari iOS/macOS; en navegadores sin soporte de códec HEIC, se captura de inmediato con mensaje claro en español: *"No pudimos procesar esta foto. Intenta elegir otra imagen o guardarla como JPG."*
+  - Estados UX de foto en `DogForm`: selección inicial, preparación/compresión (`"Preparando foto…"` con spinner), vista previa inmediata con dimensiones optimizadas, subida (`"Subiendo foto…"`), éxito (`"Foto lista"`) y error recuperable.
+- **Mecanismo de Feedback de la Beta:**
+  - Nueva migración: `supabase/migrations/20260901020000_beta_feedback.sql` aplicada a producción.
+  - Tabla `public.beta_feedback` con RLS estricto: usuarios autenticados solo pueden insertar su propio feedback; usuarios anónimos tienen acceso denegado total.
+  - Server Action: `src/app/actions/beta-feedback.ts` con validación Zod (mensaje obligatorio, categorías: *Algo no funciona*, *No entendí algo*, *Tengo una idea*, *Me gustó algo*, *Otro*, ruta actual capturada automáticamente).
+  - Componente: `src/components/feedback/beta-feedback-dialog.tsx` accesible desde la barra superior (`AppHeader`) y el pie del panel (`DashboardPage`).
+- **Identificación de Beta & Ayuda:**
+  - Píldora brutalista `[Beta]` integrada en el logo de marca (`Logo`).
+  - 6 preguntas esenciales para testers agregadas en las FAQ de la landing y accesibles desde el panel de control.
+- **Plan de Pruebas con Humanos Reales:**
+  - Documento ejecutable creado en `docs/BETA_TEST_PLAN.md` con instrucciones directas para Vicente, matriz de 12 preguntas de observación, métricas del embudo y criterios de distinción entre pruebas sintéticas y pruebas con personas reales.
+- **Pruebas y Calidad:**
+  - 8 archivos de prueba, 35/35 pruebas unitarias pasando en Vitest (`tests/client-photo.test.ts` y `tests/beta-feedback.test.ts` agregados).
+  - Lint: 0 advertencias, 0 errores.
+  - Typecheck: 0 errores de TypeScript.
+  - Build: 17 rutas generadas limpiamente con Turbopack.
+  - Validación sintética E2E en producción (`scratch/synthetic-closed-beta-e2e.js`) ejecutada y superada al 100%.
+
+---
+
 ## Real-User Beta Readiness (Completed & Deployed)
 
 - **Status:** **Ready for First Real-User Beta**
