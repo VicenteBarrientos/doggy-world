@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="relative flex w-full flex-col justify-between">
           <div className="flex justify-end">
             <Link
-              href="/dashboard"
+              href="/demo"
               className="border-2 border-white bg-white px-4 py-2 font-display text-xs uppercase tracking-wide text-ink shadow-[3px_3px_0_var(--ink)] transition hover:bg-sun"
             >
               Ver demo

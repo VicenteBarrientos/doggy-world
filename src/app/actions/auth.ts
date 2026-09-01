@@ -1,12 +1,32 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { actionMessage, stringValue } from "@/lib/action-helpers";
+import { DEMO_COOKIE } from "@/lib/demo-cookie";
 import { fieldErrorsFromZod, type ActionState } from "@/lib/forms";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { loginSchema, signUpSchema } from "@/lib/validation";
+
+/**
+ * Clears the demo_mode session cookie so that a newly authenticated real user
+ * does not accidentally remain in demo mode.
+ */
+async function clearDemoCookie() {
+  const cookieStore = await cookies();
+  try {
+    cookieStore.set(DEMO_COOKIE, "", {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    });
+  } catch {
+    // Server Components cannot set cookies — the proxy handles cleanup there.
+  }
+}
 
 export async function loginAction(
   _previousState: ActionState,
@@ -45,6 +65,9 @@ export async function loginAction(
   } catch (error) {
     return { status: "error", message: actionMessage(error) };
   }
+
+  // Clear any stale demo cookie — the real session takes over.
+  await clearDemoCookie();
 
   redirect("/dashboard");
 }
@@ -108,6 +131,9 @@ export async function signUpAction(
     }
 
     if (!data.session) {
+      // Confirmation email sent — clear demo cookie even before the user
+      // completes confirmation so a stale cookie cannot interfere.
+      await clearDemoCookie();
       return {
         status: "success",
         message: "Cuenta creada. Revisa tu correo para confirmar el acceso.",
@@ -116,6 +142,9 @@ export async function signUpAction(
   } catch (error) {
     return { status: "error", message: actionMessage(error) };
   }
+
+  // Immediate session (auto-confirm enabled) — clear demo cookie.
+  await clearDemoCookie();
 
   redirect("/dogs/new");
 }

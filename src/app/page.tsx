@@ -83,7 +83,7 @@ export default function LandingPage() {
                 <Link href="/sign-up" className="btn-base btn-electric">
                   Crear su mundo
                 </Link>
-                <Link href="/dashboard" className="btn-base btn-outline-ink">
+                <Link href="/demo" className="btn-base btn-outline-ink">
                   Explorar demo
                 </Link>
               </div>

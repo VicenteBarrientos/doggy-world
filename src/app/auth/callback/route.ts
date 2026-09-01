@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { DEMO_COOKIE } from "@/lib/demo-cookie";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,7 +15,17 @@ export async function GET(request: Request) {
   if (code && isSupabaseConfigured()) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(safeNext, requestUrl.origin));
+    if (!error) {
+      const redirectResponse = NextResponse.redirect(new URL(safeNext, requestUrl.origin));
+      // Clear any stale demo cookie — the real OAuth session takes precedence.
+      redirectResponse.cookies.set(DEMO_COOKIE, "", {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 0,
+      });
+      return redirectResponse;
+    }
   }
 
   const loginUrl = new URL("/login", requestUrl.origin);

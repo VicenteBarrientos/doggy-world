@@ -24,5 +24,6 @@ export const es = {
     title: "Modo demo",
     description:
       "Estás explorando datos sintéticos. Conecta Supabase para guardar cambios de forma permanente.",
+    exit: "Crear mi cuenta",
   },
 } as const;
