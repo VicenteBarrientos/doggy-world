@@ -193,47 +193,53 @@ When `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set:
 
 ---
 
-## Production Supabase Setup
+## Production Supabase Setup (Connected & Verified)
 
-To connect a live Supabase project:
-
-1. Create a project at [supabase.com](https://supabase.com).
-2. Authenticate CLI:
-   ```bash
-   npx supabase login
-   ```
-3. Link the repository to your Supabase project:
-   ```bash
-   npx supabase link --project-ref <your-project-ref>
-   ```
-4. Deploy the schema, triggers, RLS policies, and storage bucket:
-   ```bash
-   npx supabase db push
-   ```
-5. *(Optional for staging only)* Load synthetic test data:
-   ```bash
-   npx supabase db push --include-seed
-   ```
-6. In Supabase Dashboard -> Authentication -> URL Configuration:
-   - Set Site URL: `https://<your-deployed-domain>`
-   - Add Redirect URL: `https://<your-deployed-domain>/auth/callback`
-7. Obtain API keys from Supabase Dashboard -> Settings -> API:
-   - `Project URL` -> `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` key -> `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   *(No service role key is needed by the web app).*
+- **Status:** **Active & Healthy in Production**
+- **Project Reference:** `ugqblaoyfccozkjffoeg`
+- **Region:** `sa-east-1` (São Paulo, South America / LATAM)
+- **Project URL:** `https://ugqblaoyfccozkjffoeg.supabase.co`
+- **Canonical Migration:** `supabase/migrations/20260901000000_initial_doggy_world.sql` (deployed via `supabase db push`)
+- **Tables Active & Protected by RLS:**
+  - `public.profiles` (auto-created via `handle_new_user()` trigger on `auth.users`)
+  - `public.dogs` (owner CRUD + public read when `is_public = true`)
+  - `public.dog_preferences` (owner CRUD + public read when `is_public = true` and dog is public)
+  - `public.products` (12 generic products seeded; public read of active products)
+  - `public.dog_product_interactions` (owner CRUD; private notes strictly protected)
+  - `public.dog_friendships` (symmetric friendship pair constraint, state machine validation trigger)
+- **Storage Bucket:**
+  - `dog-photos` (private bucket, 3MB limit, image/jpeg, image/png, image/webp; RLS folder hierarchy `{owner_id}/{dog_id}/profile.{ext}`)
+- **Auth URL Configuration:**
+  - Site URL: `https://doggy-world.vercel.app`
+  - Redirect URLs: `https://doggy-world.vercel.app/**`, `http://localhost:3000/**`
+  - Mailer autoconfirm: enabled for friction-free onboarding verification
+- **Verification & E2E Testing Performed:**
+  - Two synthetic test users (`Owner A`, `Owner B`) registered and verified.
+  - Profile auto-generation verified through `on_auth_user_created` trigger.
+  - Photo uploads to private `dog-photos` storage verified for both owners.
+  - Dog creation (`Tango`, `Bella`) with public passport links verified.
+  - Anonymous visitor privacy check: 0 sensitive fields exposed (no email, no coordinates, no auth UID, no private interaction notes).
+  - Multi-user friendship cycle: Dog A requests Dog B -> User B views pending request -> User B accepts -> symmetric friendship visible on public passports.
+  - Negative authorization checks:
+    - Cross-user dog updates blocked (RLS enforced: 0 rows modified).
+    - Cross-user dog deletions blocked (RLS enforced: 0 rows deleted).
+    - Cross-user storage folder writes blocked.
+    - Cross-user product feedback creation blocked.
+    - Self-friendship requests blocked by check constraint (`dog_friendships_not_self`).
+    - Duplicate friendship requests blocked by unique pair index (`dog_friendships_unique_pair_idx`).
 
 ---
 
-## Vercel Setup
+## Vercel Setup (Connected & Deployed)
 
-1. Import GitHub repository `VicenteBarrientos/doggy-world` into Vercel.
-2. Set Environment Variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`: `<your-supabase-url>` (or leave empty for Demo Mode)
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: `<your-supabase-anon-key>` (or leave empty for Demo Mode)
-   - `NEXT_PUBLIC_SITE_URL`: `https://<your-vercel-domain>.vercel.app`
-3. Framework Preset: **Next.js**
-4. Root Directory: `./`
-5. Deploy.
+- **Production URL:** [https://doggy-world.vercel.app](https://doggy-world.vercel.app)
+- **Framework Preset:** Next.js (App Router, Turbopack)
+- **Environment Variables Configured (Production & Preview):**
+  - `NEXT_PUBLIC_SUPABASE_URL`: `https://ugqblaoyfccozkjffoeg.supabase.co`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: (Production Anon Public Key)
+  - `NEXT_PUBLIC_SITE_URL`: `https://doggy-world.vercel.app`
+- **Dynamic Data Rendering:** Pages (`/dashboard`, `/discover`, `/products`, `/dog/[slug]`, `/friend-requests`) render live data dynamically from Supabase.
+- **Deterministic Demo Fallback:** Fully preserved in `src/lib/demo-data.ts`; seamlessly takes over whenever Supabase environment variables are not supplied.
 
 ---
 
