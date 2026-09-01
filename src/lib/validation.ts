@@ -3,6 +3,17 @@ import { z } from "zod";
 const emptyToUndefined = (value: unknown) =>
   value === "" || value === null ? undefined : value;
 
+export function normalizeInstagramHandle(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const withoutUrl = trimmed
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")
+    .replace(/\/$/, "");
+  const handle = withoutUrl.replace(/^@+/, "").trim();
+  return handle || null;
+}
+
 export const loginSchema = z.object({
   email: z
     .string({ error: "Ingresa tu correo." })
@@ -65,6 +76,19 @@ export const dogSchema = z
       .default(""),
     city: z.string().trim().max(80).optional(),
     country: z.string().trim().max(80).optional(),
+    instagramHandle: z
+      .preprocess(
+        normalizeInstagramHandle,
+        z
+          .string()
+          .regex(
+            /^[a-zA-Z0-9._]{1,30}$/,
+            "El usuario de Instagram debe tener entre 1 y 30 caracteres válidos.",
+          )
+          .optional()
+          .nullable(),
+      )
+      .default(null),
     isPublic: z.boolean().default(true),
   })
   .refine(

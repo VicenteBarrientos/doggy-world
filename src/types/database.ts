@@ -62,6 +62,7 @@ export type Database = {
           bio: string;
           city: string | null;
           country: string | null;
+          instagram_handle: string | null;
           is_public: boolean;
           created_at: string;
           updated_at: string;
@@ -86,6 +87,7 @@ export type Database = {
           bio?: string;
           city?: string | null;
           country?: string | null;
+          instagram_handle?: string | null;
           is_public?: boolean;
           created_at?: string;
           updated_at?: string;

@@ -37,6 +37,7 @@ function parseDogForm(formData: FormData) {
     bio: stringValue(formData, "bio") || undefined,
     city: stringValue(formData, "city") || undefined,
     country: stringValue(formData, "country") || undefined,
+    instagramHandle: stringValue(formData, "instagramHandle") || undefined,
     isPublic: formData.has("isPublic") ? checkboxValue(formData, "isPublic") : true,
   });
 }
@@ -109,6 +110,7 @@ export async function createDogAction(
       bio: parsed.data.bio,
       city: parsed.data.city ?? null,
       country: parsed.data.country ?? null,
+      instagram_handle: parsed.data.instagramHandle ?? null,
       is_public: parsed.data.isPublic,
     };
 
@@ -184,6 +186,7 @@ export async function updateDogAction(
       bio: parsed.data.bio,
       city: parsed.data.city ?? null,
       country: parsed.data.country ?? null,
+      instagram_handle: parsed.data.instagramHandle ?? null,
       is_public: parsed.data.isPublic,
       photo_path: photoPath,
     };

@@ -429,6 +429,27 @@ export function DogForm({ dog }: { dog?: DogWithPhoto }) {
             </div>
           </div>
 
+          <div>
+            <label htmlFor="instagramHandle" className="block font-display text-xs uppercase tracking-wider text-ink">
+              Instagram del perro <span className="font-normal text-ink/70">· opcional</span>
+            </label>
+            <div className="relative mt-2 flex items-center">
+              <span className="absolute left-3.5 select-none font-bold text-ink/50">@</span>
+              <input
+                id="instagramHandle"
+                name="instagramHandle"
+                defaultValue={dog?.instagram_handle ?? ""}
+                className={`${inputClass} !pl-8`}
+                placeholder="rockythegolden"
+                maxLength={30}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-ink/60">
+              Se mostrará como enlace en su pasaporte público para conectar con otros dueños.
+            </p>
+            <FieldError errors={state.fieldErrors?.instagramHandle} />
+          </div>
+
             <div>
               <fieldset>
                 <legend className="font-display text-xs uppercase tracking-wider text-ink">

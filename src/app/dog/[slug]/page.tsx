@@ -11,6 +11,7 @@ import { MarketingHeader } from "@/components/layout/marketing-header";
 import { ProductVisual } from "@/components/products/product-visual";
 import { ShareProfile } from "@/components/share/share-profile";
 import { TrackEvent } from "@/components/analytics/track-event";
+import { InstagramIcon } from "@/components/icons/instagram-icon";
 import { Badge } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
 import { energyOptions, preferenceCategoryLabels, sociabilityOptions } from "@/lib/constants";
@@ -100,6 +101,20 @@ export default async function PublicDogPage({ params, searchParams }: Props) {
                       <MapPin size={15} /> {dog.city}
                       {dog.country ? `, ${dog.country}` : ""}
                     </p>
+                  ) : null}
+
+                  {dog.instagram_handle ? (
+                    <div className="mt-3">
+                      <a
+                        href={`https://www.instagram.com/${dog.instagram_handle}/`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 border-2 border-ink bg-white px-3 py-1 font-display text-xs uppercase tracking-wider text-ink shadow-[2px_2px_0_var(--ink)] transition hover:-translate-y-0.5 hover:bg-cream-deep"
+                      >
+                        <InstagramIcon size={14} />
+                        <span>@{dog.instagram_handle}</span>
+                      </a>
+                    </div>
                   ) : null}
 
                   <div className="mt-6 flex flex-wrap gap-2">
