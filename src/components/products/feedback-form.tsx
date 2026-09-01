@@ -1,7 +1,7 @@
 "use client";
 
 import { Heart, LoaderCircle, Sparkles } from "lucide-react";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { saveProductFeedbackAction } from "@/app/actions/feedback";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { FormStatus } from "@/components/ui/form-feedback";
 import { ProductVisual } from "@/components/products/product-visual";
 import { reactionOptions } from "@/lib/constants";
 import { initialActionState } from "@/lib/forms";
+import { track } from "@/lib/analytics";
 import type { DogProductInteraction, DogWithPhoto, Product } from "@/types/database";
 
 export function FeedbackForm({
@@ -25,6 +26,15 @@ export function FeedbackForm({
   const selectedReaction = reactionOptions.find((option) => option.value === reaction);
   const isToy = product.category === "toy";
   const isEdible = product.category === "treat" || product.category === "food";
+
+  useEffect(() => {
+    if (state.status === "success") {
+      track("product_feedback_submitted", {
+        category: product.category,
+        reaction: reaction || undefined,
+      });
+    }
+  }, [state.status, product.category, reaction]);
 
   return (
     <form action={action} className="rounded-[2.5rem] border border-line bg-white p-5 shadow-card sm:p-8" noValidate>

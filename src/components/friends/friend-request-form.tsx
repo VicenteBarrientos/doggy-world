@@ -2,12 +2,13 @@
 
 import { LoaderCircle, PawPrint } from "lucide-react";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 
 import { sendFriendRequestAction } from "@/app/actions/friendships";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { FormStatus } from "@/components/ui/form-feedback";
 import { initialActionState } from "@/lib/forms";
+import { track } from "@/lib/analytics";
 import type { DogWithPhoto } from "@/types/database";
 
 export function FriendRequestForm({
@@ -20,6 +21,12 @@ export function FriendRequestForm({
   recipientName: string;
 }) {
   const [state, action, pending] = useActionState(sendFriendRequestAction, initialActionState);
+
+  useEffect(() => {
+    if (state.status === "success") {
+      track("friendship_request_sent");
+    }
+  }, [state.status]);
 
   if (!ownerDogs.length) {
     return (

@@ -3,21 +3,37 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { DogForm } from "@/components/dogs/dog-form";
+import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
+import { TrackEvent } from "@/components/analytics/track-event";
 import { buttonStyles } from "@/components/ui/button";
 
-export const metadata: Metadata = { title: "Agregar perro" };
+export const metadata: Metadata = { title: "Crear pasaporte de tu perro" };
 
 export default function NewDogPage() {
   return (
-    <div className="mx-auto max-w-4xl">
-      <Link href="/dashboard" className={buttonStyles({ variant: "ghost", size: "sm", className: "-ml-3" })}>
-        <ArrowLeft size={16} /> Volver al inicio
+    <div className="mx-auto max-w-3xl">
+      <TrackEvent name="dog_creation_started" />
+
+      <Link
+        href="/dashboard"
+        className={buttonStyles({ variant: "ghost", size: "sm", className: "-ml-3 mb-4" })}
+      >
+        <ArrowLeft size={16} /> Volver al panel
       </Link>
-      <div className="mb-8 mt-5">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand">Nuevo pasaporte</p>
-        <h1 className="mt-2 text-balance font-display text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">Cuéntanos quién es tu perro.</h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-ink-muted">Empieza con lo que sabes hoy. Su pasaporte puede crecer y cambiar junto a él.</p>
+
+      <OnboardingProgress currentStep={2} />
+
+      <div className="mb-8">
+        <p className="font-brush text-3xl text-electric">Paso 2 de 4</p>
+        <h1 className="mt-1 font-display text-4xl uppercase tracking-tight sm:text-5xl">
+          Cuéntanos quién es tu perro
+        </h1>
+        <p className="mt-3 max-w-xl text-sm leading-6 text-ink/75 sm:text-base">
+          Solo necesitamos su nombre, su foto y su raza para emitir su pasaporte público. Todo lo
+          demás podrás personalizarlo a tu ritmo.
+        </p>
       </div>
+
       <DogForm />
     </div>
   );

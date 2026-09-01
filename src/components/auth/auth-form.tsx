@@ -2,17 +2,28 @@
 
 import { ArrowRight, LoaderCircle, LockKeyhole, Mail, UserRound } from "lucide-react";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 
 import { loginAction, signUpAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { FieldError, FormStatus } from "@/components/ui/form-feedback";
 import { initialActionState } from "@/lib/forms";
+import { track } from "@/lib/analytics";
 
 export function AuthForm({ mode }: { mode: "login" | "sign-up" }) {
   const action = mode === "login" ? loginAction : signUpAction;
   const [state, formAction, pending] = useActionState(action, initialActionState);
   const isLogin = mode === "login";
+
+  useEffect(() => {
+    if (state.status === "success") {
+      if (mode === "sign-up") {
+        track("signup_completed");
+      } else {
+        track("login_completed");
+      }
+    }
+  }, [state.status, mode]);
 
   return (
     <form action={formAction} className="space-y-5" noValidate>

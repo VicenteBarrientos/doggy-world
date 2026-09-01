@@ -40,6 +40,23 @@ export function stringValue(formData: FormData, key: string) {
 }
 
 export function actionMessage(error: unknown) {
-  if (error instanceof Error) return error.message;
+  if (error instanceof Error) {
+    const msg = error.message;
+    const lower = msg.toLowerCase();
+    if (
+      lower.includes("violates") ||
+      lower.includes("duplicate key") ||
+      lower.includes("relation") ||
+      lower.includes("postgres") ||
+      lower.includes("pgrst") ||
+      lower.includes("column") ||
+      lower.includes("constraint") ||
+      lower.includes("syntax")
+    ) {
+      console.error("[Database Error]", error);
+      return "No pudimos completar la operación debido a un problema de datos. Por favor inténtalo nuevamente.";
+    }
+    return msg;
+  }
   return "Ocurrió un error inesperado. Inténtalo nuevamente.";
 }

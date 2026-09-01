@@ -32,8 +32,8 @@ export const dogSchema = z
       .trim()
       .min(2, "Cuéntanos la raza o mezcla.")
       .max(80, "La raza es demasiado larga."),
-    mixedBreed: z.boolean(),
-    sex: z.enum(["female", "male", "unknown"]),
+    mixedBreed: z.boolean().default(false),
+    sex: z.enum(["female", "male", "unknown"]).default("unknown"),
     birthDate: z.preprocess(
       emptyToUndefined,
       z.iso.date("Ingresa una fecha válida.").optional(),
@@ -50,20 +50,22 @@ export const dogSchema = z
         .max(150, "Revisa el peso ingresado.")
         .optional(),
     ),
-    size: z.enum(["small", "medium", "large", "giant"]),
-    energyLevel: z.enum(["low", "medium", "high", "very_high"]),
-    sociability: z.enum(["shy", "selective", "social", "very_social"]),
+    size: z.enum(["small", "medium", "large", "giant"]).default("medium"),
+    energyLevel: z.enum(["low", "medium", "high", "very_high"]).default("medium"),
+    sociability: z.enum(["shy", "selective", "social", "very_social"]).default("social"),
     playStyle: z.string().trim().max(100).optional(),
     personalityTags: z
       .array(z.string().regex(/^[a-z_]+$/))
-      .max(6, "Elige hasta 6 rasgos."),
+      .max(6, "Elige hasta 6 rasgos.")
+      .default([]),
     bio: z
       .string()
       .trim()
-      .max(600, "La historia debe tener menos de 600 caracteres."),
+      .max(600, "La historia debe tener menos de 600 caracteres.")
+      .default(""),
     city: z.string().trim().max(80).optional(),
     country: z.string().trim().max(80).optional(),
-    isPublic: z.boolean(),
+    isPublic: z.boolean().default(true),
   })
   .refine(
     ({ birthDate, adoptionDate }) =>

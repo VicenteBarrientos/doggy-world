@@ -3,12 +3,14 @@ import { CalendarDays, Heart, MapPin, PawPrint, Ruler, Sparkles, Users, Zap } fr
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CelebrationBanner } from "@/components/dogs/celebration-banner";
 import { DogAvatar } from "@/components/dogs/dog-avatar";
 import { DogCard } from "@/components/dogs/dog-card";
 import { FriendRequestForm } from "@/components/friends/friend-request-form";
 import { MarketingHeader } from "@/components/layout/marketing-header";
 import { ProductVisual } from "@/components/products/product-visual";
 import { ShareProfile } from "@/components/share/share-profile";
+import { TrackEvent } from "@/components/analytics/track-event";
 import { Badge } from "@/components/ui/badge";
 import { buttonStyles } from "@/components/ui/button";
 import { energyOptions, preferenceCategoryLabels, sociabilityOptions } from "@/lib/constants";
@@ -16,7 +18,10 @@ import { getOwnerDogs, getPublicDog } from "@/lib/data/dogs";
 import { getViewer } from "@/lib/data/viewer";
 import { absoluteUrl, formatAge, formatWeight, personalityLabel } from "@/lib/utils";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ created?: string }>;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -29,10 +34,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PublicDogPage({ params }: Props) {
-  const { slug } = await params;
+export default async function PublicDogPage({ params, searchParams }: Props) {
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
   const [dog, viewer] = await Promise.all([getPublicDog(slug), getViewer()]);
   if (!dog) notFound();
+
+  const isOwner = viewer?.id === dog.owner_id;
+  const isNewlyCreated = query.created === "true" && isOwner;
   const ownerDogs = viewer ? await getOwnerDogs() : [];
   const canRequest = viewer?.id !== dog.owner_id;
   const energy = energyOptions.find((item) => item.value === dog.energy_level)?.label;
@@ -41,9 +49,25 @@ export default async function PublicDogPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-cream text-ink">
+      <TrackEvent
+        name={isOwner ? "passport_viewed_owner" : "passport_viewed_public"}
+        properties={{ breed: dog.breed }}
+      />
+      {isNewlyCreated ? (
+        <TrackEvent name="dog_created" properties={{ breed: dog.breed }} />
+      ) : null}
+
       <MarketingHeader />
       <main className="px-4 pb-24 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
+          {/* CELEBRATION ON FIRST CREATION */}
+          {isNewlyCreated ? (
+            <CelebrationBanner
+              dogName={dog.name}
+              dogId={dog.id}
+            />
+          ) : null}
+
           {/* PASSPORT HERO CONTAINER */}
           <section className="edge-card overflow-hidden rounded-sm bg-white shadow-[8px_8px_0_var(--ink)]">
             <div className="grid lg:grid-cols-[.92fr_1.08fr]">
@@ -137,7 +161,7 @@ export default async function PublicDogPage({ params }: Props) {
           {/* COMMUNITY & SHARE STATUS */}
           <div className="mt-8 flex flex-col justify-between gap-4 border-2 border-ink bg-cream-deep p-5 shadow-[4px_4px_0_var(--ink)] sm:flex-row sm:items-center sm:p-6">
             <div className="flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center border-2 border-ink bg-sun shadow-[2px_2px_0_var(--ink)] text-ink">
+              <span className="flex size-11 items-center justify-center border-2 border-ink bg-sun text-ink shadow-[2px_2px_0_var(--ink)]">
                 <PawPrint size={22} />
               </span>
               <div>
@@ -149,7 +173,11 @@ export default async function PublicDogPage({ params }: Props) {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <ShareProfile dogName={dog.name} profileUrl={profileUrl} />
+              <ShareProfile
+                dogName={dog.name}
+                profileUrl={profileUrl}
+                initialOpen={isNewlyCreated}
+              />
               {viewer?.id === dog.owner_id ? (
                 <Link
                   href={`/dogs/${dog.id}`}
@@ -244,7 +272,7 @@ export default async function PublicDogPage({ params }: Props) {
             {/* Aside */}
             <aside className="lg:sticky lg:top-24 lg:self-start">
               <section className="edge-card p-6">
-                <div className="flex size-12 items-center justify-center border-2 border-ink bg-sun shadow-[2px_2px_0_var(--ink)] text-ink">
+                <div className="flex size-12 items-center justify-center border-2 border-ink bg-sun text-ink shadow-[2px_2px_0_var(--ink)]">
                   <Heart size={22} />
                 </div>
                 <h2 className="mt-4 text-2xl">¿Se conocen?</h2>

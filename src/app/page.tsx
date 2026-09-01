@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Wordmark } from "@/components/brand/wordmark";
 import { MarketingHeader } from "@/components/layout/marketing-header";
 import { ConstructionBadge } from "@/components/ui/badge";
+import { TrackEvent } from "@/components/analytics/track-event";
 
 const marquee = [
   "Juguetes certificados",
@@ -54,6 +55,7 @@ export default function LandingPage() {
       <MarketingHeader />
 
       <main>
+        <TrackEvent name="landing_view" />
         {/* HERO SECTION */}
         <section className="relative overflow-hidden border-b-2 border-ink">
           <div className="pointer-events-none absolute right-0 top-16 h-[400px] w-[400px] rounded-full bg-sun/60 sm:h-[560px] sm:w-[560px] md:right-[6%]" />

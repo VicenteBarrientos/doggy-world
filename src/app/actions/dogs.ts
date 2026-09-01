@@ -23,21 +23,21 @@ function parseDogForm(formData: FormData) {
     name: stringValue(formData, "name"),
     breed: stringValue(formData, "breed"),
     mixedBreed: checkboxValue(formData, "mixedBreed"),
-    sex: stringValue(formData, "sex"),
-    birthDate: stringValue(formData, "birthDate"),
-    adoptionDate: stringValue(formData, "adoptionDate"),
-    weightKg: stringValue(formData, "weightKg"),
-    size: stringValue(formData, "size"),
-    energyLevel: stringValue(formData, "energyLevel"),
-    sociability: stringValue(formData, "sociability"),
+    sex: stringValue(formData, "sex") || undefined,
+    birthDate: stringValue(formData, "birthDate") || undefined,
+    adoptionDate: stringValue(formData, "adoptionDate") || undefined,
+    weightKg: stringValue(formData, "weightKg") || undefined,
+    size: stringValue(formData, "size") || undefined,
+    energyLevel: stringValue(formData, "energyLevel") || undefined,
+    sociability: stringValue(formData, "sociability") || undefined,
     playStyle: stringValue(formData, "playStyle") || undefined,
     personalityTags: formData
       .getAll("personalityTags")
       .filter((value): value is string => typeof value === "string"),
-    bio: stringValue(formData, "bio"),
+    bio: stringValue(formData, "bio") || undefined,
     city: stringValue(formData, "city") || undefined,
     country: stringValue(formData, "country") || undefined,
-    isPublic: checkboxValue(formData, "isPublic"),
+    isPublic: formData.has("isPublic") ? checkboxValue(formData, "isPublic") : true,
   });
 }
 
@@ -72,9 +72,11 @@ export async function createDogAction(
   }
 
   let dogId = "";
+  let dogSlug = "";
   try {
     const { supabase, user } = await requireActionUser();
     dogId = crypto.randomUUID();
+    dogSlug = buildDogSlug(parsed.data.name, dogId);
     const photoValue = formData.get("photo");
     const photo = validatePhoto(photoValue instanceof File ? photoValue : null);
     let photoPath: string | null = null;
@@ -91,7 +93,7 @@ export async function createDogAction(
       id: dogId,
       owner_id: user.id,
       name: parsed.data.name,
-      slug: buildDogSlug(parsed.data.name, dogId),
+      slug: dogSlug,
       photo_path: photoPath,
       breed: parsed.data.breed,
       mixed_breed: parsed.data.mixedBreed,
@@ -122,7 +124,9 @@ export async function createDogAction(
   }
 
   revalidatePath("/dashboard");
-  redirect(`/dogs/${dogId}`);
+  revalidatePath("/discover");
+  revalidatePath(`/dog/${dogSlug}`);
+  redirect(`/dog/${dogSlug}?created=true`);
 }
 
 export async function updateDogAction(

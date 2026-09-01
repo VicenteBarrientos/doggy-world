@@ -1,8 +1,8 @@
-import { ArrowRight, Compass, Package, PawPrint, Plus, QrCode, Users } from "lucide-react";
+import { Compass, Package, PawPrint, Plus, QrCode, Users } from "lucide-react";
 import Link from "next/link";
 
 import { DashboardDogCard } from "@/components/dogs/dashboard-dog-card";
-import { EmptyState } from "@/components/ui/empty-state";
+import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
 import { buttonStyles } from "@/components/ui/button";
 import { getOwnerDog, getOwnerDogs } from "@/lib/data/dogs";
 import { getFriendRequests } from "@/lib/data/friendships";
@@ -15,6 +15,48 @@ export default async function DashboardPage() {
     getOwnerDogs(),
     getFriendRequests(),
   ]);
+
+  // First-run experience when the user has zero dogs
+  if (dogs.length === 0) {
+    return (
+      <div className="mx-auto max-w-2xl py-4 sm:py-8">
+        <OnboardingProgress currentStep={2} />
+
+        <div className="edge-card p-8 text-center shadow-[8px_8px_0_var(--ink)] sm:p-12">
+          <div className="mx-auto flex size-20 items-center justify-center border-2 border-ink bg-sun text-ink shadow-[3px_3px_0_var(--ink)]">
+            <PawPrint size={36} />
+          </div>
+
+          <p className="mt-6 font-brush text-3xl text-electric">
+            Bienvenido, {viewer.profile.display_name.split(" ")[0]}
+          </p>
+          <h1 className="mt-1 font-display text-4xl uppercase sm:text-5xl">
+            Creemos el pasaporte de tu perro
+          </h1>
+          <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-ink/75 sm:text-base">
+            Solo toma un minuto. Sube su foto, indícanos su nombre y raza, y tendrás un pasaporte
+            digital listo para compartir por enlace o código QR.
+          </p>
+
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+            <Link
+              href="/dogs/new"
+              className={buttonStyles({ variant: "primary", size: "lg", className: "w-full sm:w-auto" })}
+            >
+              <Plus size={18} /> Crear pasaporte ahora 🐾
+            </Link>
+            <Link
+              href="/discover"
+              className={buttonStyles({ variant: "outline", size: "lg", className: "w-full sm:w-auto" })}
+            >
+              <Compass size={18} /> Ver ejemplos de la comunidad
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const dogDetails = await Promise.all(dogs.map((dog) => getOwnerDog(dog.id)));
   const completeness = new Map(
     dogs.map((dog, index) => [
@@ -49,28 +91,16 @@ export default async function DashboardPage() {
             </p>
           </div>
         </div>
-        {dogs.length ? (
-          <div className="grid gap-6 xl:grid-cols-2">
-            {dogs.map((dog) => (
-              <DashboardDogCard
-                key={dog.id}
-                dog={dog}
-                completeness={completeness.get(dog.id) ?? 0}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={<PawPrint size={26} />}
-            title="Tu primer pasaporte empieza aquí"
-            description="Agrega a tu perro, sube su foto y crea una identidad digital que lo acompañará siempre."
-            action={
-              <Link href="/dogs/new" className={buttonStyles({ variant: "primary" })}>
-                Agregar mi perro <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            }
-          />
-        )}
+
+        <div className="grid gap-6 xl:grid-cols-2">
+          {dogs.map((dog) => (
+            <DashboardDogCard
+              key={dog.id}
+              dog={dog}
+              completeness={completeness.get(dog.id) ?? 0}
+            />
+          ))}
+        </div>
       </section>
 
       <section className="mt-16">
@@ -84,7 +114,7 @@ export default async function DashboardPage() {
             className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1"
           >
             <div className="flex items-start justify-between gap-3">
-              <span className="flex size-12 items-center justify-center border-2 border-ink bg-sun shadow-[2px_2px_0_var(--ink)] text-ink">
+              <span className="flex size-12 items-center justify-center border-2 border-ink bg-sun text-ink shadow-[2px_2px_0_var(--ink)]">
                 <Users size={22} />
               </span>
               <span className="font-display text-3xl text-electric">{friendRequests.length}</span>
@@ -98,7 +128,7 @@ export default async function DashboardPage() {
             href="/products"
             className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1"
           >
-            <span className="flex size-12 items-center justify-center border-2 border-ink bg-electric shadow-[2px_2px_0_var(--ink)] text-white">
+            <span className="flex size-12 items-center justify-center border-2 border-ink bg-electric text-white shadow-[2px_2px_0_var(--ink)]">
               <Package size={22} />
             </span>
             <h3 className="mt-5 font-display text-xl uppercase">Registrar reacción</h3>
@@ -110,7 +140,7 @@ export default async function DashboardPage() {
             href={dogs[0] ? `/dog/${dogs[0].slug}#share` : "/dogs/new"}
             className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1"
           >
-            <span className="flex size-12 items-center justify-center border-2 border-ink bg-cream-deep shadow-[2px_2px_0_var(--ink)] text-ink">
+            <span className="flex size-12 items-center justify-center border-2 border-ink bg-cream-deep text-ink shadow-[2px_2px_0_var(--ink)]">
               <QrCode size={22} />
             </span>
             <h3 className="mt-5 font-display text-xl uppercase">Compartir pasaporte</h3>
@@ -122,7 +152,7 @@ export default async function DashboardPage() {
             href="/discover"
             className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1"
           >
-            <span className="flex size-12 items-center justify-center border-2 border-ink bg-sun shadow-[2px_2px_0_var(--ink)] text-ink">
+            <span className="flex size-12 items-center justify-center border-2 border-ink bg-sun text-ink shadow-[2px_2px_0_var(--ink)]">
               <Compass size={22} />
             </span>
             <h3 className="mt-5 font-display text-xl uppercase">Conocer otros perros</h3>

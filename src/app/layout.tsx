@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { Archivo_Black, Caveat_Brush, Hind } from "next/font/google";
 
 import { absoluteUrl } from "@/lib/utils";
@@ -57,7 +58,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="es"
       className={`${archivoBlack.variable} ${caveatBrush.variable} ${hind.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

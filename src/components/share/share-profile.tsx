@@ -5,15 +5,36 @@ import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
-export function ShareProfile({ dogName, profileUrl }: { dogName: string; profileUrl: string }) {
-  const [open, setOpen] = useState(false);
+export function ShareProfile({
+  dogName,
+  profileUrl,
+  initialOpen = false,
+}: {
+  dogName: string;
+  profileUrl: string;
+  initialOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(initialOpen);
   const [copied, setCopied] = useState(false);
 
+  function handleOpen() {
+    setOpen(true);
+    track("passport_share_opened", { source: "share_button" });
+    track("passport_qr_opened", { source: "modal_render" });
+  }
+
   async function copyLink() {
-    await navigator.clipboard.writeText(profileUrl);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      setCopied(true);
+      track("passport_share_opened", { method: "clipboard_copy" });
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Fallback
+      track("passport_share_opened", { method: "clipboard_failed" });
+    }
   }
 
   async function nativeShare() {
@@ -21,16 +42,21 @@ export function ShareProfile({ dogName, profileUrl }: { dogName: string; profile
       await copyLink();
       return;
     }
-    await navigator.share({
-      title: `Conoce a ${dogName} en Doggy World`,
-      text: `Este es el pasaporte digital de ${dogName} 🐾`,
-      url: profileUrl,
-    });
+    try {
+      await navigator.share({
+        title: `Conoce a ${dogName} en Doggy World`,
+        text: `Este es el pasaporte digital de ${dogName} 🐾`,
+        url: profileUrl,
+      });
+      track("passport_share_opened", { method: "native_share" });
+    } catch {
+      // User cancelled or share aborted
+    }
   }
 
   return (
     <div id="share">
-      <Button type="button" variant="primary" size="md" onClick={() => setOpen(true)}>
+      <Button type="button" variant="primary" size="md" onClick={handleOpen}>
         <Share2 size={16} /> Compartir pasaporte
       </Button>
       {open ? (
@@ -79,8 +105,8 @@ export function ShareProfile({ dogName, profileUrl }: { dogName: string; profile
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Button type="button" variant="outline" size="sm" onClick={copyLink}>
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                {copied ? "Copiado" : "Copiar enlace"}
+                {copied ? <Check size={16} className="text-electric" /> : <Copy size={16} />}
+                {copied ? "¡Enlace copiado!" : "Copiar enlace"}
               </Button>
               <Button type="button" variant="primary" size="sm" onClick={nativeShare}>
                 <Share2 size={16} /> Compartir

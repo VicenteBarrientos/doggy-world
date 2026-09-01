@@ -49,6 +49,23 @@ export async function loginAction(
   redirect("/dashboard");
 }
 
+function friendlyAuthError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes("already registered") || lower.includes("already exists") || lower.includes("user_already_exists")) {
+    return "Este correo ya tiene una cuenta registrada. Por favor inicia sesión.";
+  }
+  if (lower.includes("invalid login credentials") || lower.includes("invalid credentials")) {
+    return "El correo o la contraseña no coinciden.";
+  }
+  if (lower.includes("rate limit") || lower.includes("too many requests")) {
+    return "Demasiados intentos seguidos. Por favor espera unos momentos.";
+  }
+  if (lower.includes("password")) {
+    return "La contraseña debe tener al menos 8 caracteres.";
+  }
+  return "No pudimos procesar tu solicitud. Por favor inténtalo de nuevo.";
+}
+
 export async function signUpAction(
   _previousState: ActionState,
   formData: FormData,
@@ -87,7 +104,7 @@ export async function signUpAction(
     });
 
     if (error) {
-      return { status: "error", message: error.message };
+      return { status: "error", message: friendlyAuthError(error.message) };
     }
 
     if (!data.session) {
