@@ -248,14 +248,11 @@ When `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set:
 - **Identificación de Beta & Ayuda:**
   - Píldora brutalista `[Beta]` integrada en el logo de marca (`Logo`).
   - 6 preguntas esenciales para testers agregadas en las FAQ de la landing y accesibles desde el panel de control.
-- **Plan de Pruebas con Humanos Reales:**
-  - Documento ejecutable creado en `docs/BETA_TEST_PLAN.md` con instrucciones directas para Vicente, matriz de 12 preguntas de observación, métricas del embudo y criterios de distinción entre pruebas sintéticas y pruebas con personas reales.
-- **Pruebas y Calidad:**
-  - 8 archivos de prueba, 35/35 pruebas unitarias pasando en Vitest (`tests/client-photo.test.ts` y `tests/beta-feedback.test.ts` agregados).
-  - Lint: 0 advertencias, 0 errores.
-  - Typecheck: 0 errores de TypeScript.
-  - Build: 17 rutas generadas limpiamente con Turbopack.
-  - Validación sintética E2E en producción (`scratch/synthetic-closed-beta-e2e.js`) ejecutada y superada al 100%.
+- **Plan y Registro de Pruebas Humanas:**
+  - `docs/BETA_TEST_PLAN.md` actualizado con el mensaje breve y directo de invitación que Vicente puede copiar y enviar directamente por WhatsApp/Telegram.
+  - `docs/BETA_SESSIONS.md` preparado para registrar de forma anónima y estructurada el embudo, fricciones, comportamiento natural, citas textuales e ideas de Tester 01 a Tester 05+.
+  - Regla estricta: No se agregan nuevas features ni se rediseña la UI hasta obtener evidencia empírica de al menos 5 usuarios humanos reales.
+- **Próxima Acción Inmediata:** Vicente envía la invitación al primer dueño de perro real.
 
 ---
 

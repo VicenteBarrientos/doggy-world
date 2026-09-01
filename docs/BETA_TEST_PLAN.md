@@ -12,22 +12,21 @@ Este documento es una guía práctica de ejecución para **Vicente**. Su propós
 
 ---
 
-## 2. Instrucciones para los Testers
+## 2. Mensaje para Copiar y Enviar a los Testers
 
-Envía a cada tester únicamente el siguiente mensaje (por WhatsApp, Telegram o correo):
+Copia y envía este texto exacto por WhatsApp o mensaje directo:
 
 ```text
-¡Hola! Estoy probando las primeras funciones de Doggy World, un espacio digital para perros.
-¿Me ayudas probándolo con tu perro? Toma unos 2 minutos desde tu teléfono:
+¡Hola! Estoy probando Doggy World con un grupo muy chico de personas.
 
-1. Entra a: https://doggy-world.vercel.app
-2. Crea tu cuenta.
-3. Crea el pasaporte de tu perro (usa una foto real de tu teléfono).
-4. Explora lo que te llame la atención.
-5. Intenta compartir su pasaporte con alguien.
-6. Si algo te confunde o no te gusta, cuéntamelo sin filtro.
+Entra desde tu celular:
+https://doggy-world.vercel.app
 
-¡Muchas gracias! 🐾
+Crea una cuenta y el perfil de tu perro.
+
+No quiero explicarte cómo funciona antes porque justamente quiero ver si se entiende solo.
+
+Si algo te confunde o no funciona, usa el botón de feedback dentro de la app o dímelo por acá. ¡Muchas gracias! 🐾
 ```
 
 ---
