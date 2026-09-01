@@ -1,39 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #fffaf2;
+  --ink: #1f1d1b;
+  --cream: #fbf9f3;
+  --cream-deep: #f3ece0;
+  --electric: #0b50f5;
+  --electric-foreground: #ffffff;
+  --sun: #ffd426;
+  --sun-foreground: #1f1d1b;
+  --danger: #d93829;
+
+  /* Aliases for backwards-compatible semantic mapping */
+  --canvas: var(--cream);
   --surface: #ffffff;
-  --surface-muted: #f7f1e7;
-  --ink: #20352d;
-  --ink-muted: #66756f;
-  --brand: #196b52;
-  --brand-strong: #0f4f3b;
-  --brand-soft: #dff2e8;
-  --accent: #ed8e50;
-  --accent-soft: #ffe3cc;
-  --sun: #f5c55a;
-  --line: #e8dfd2;
-  --danger: #b84f4a;
+  --surface-muted: var(--cream-deep);
+  --brand: var(--electric);
+  --brand-strong: var(--ink);
+  --brand-soft: #e7efff;
+  --accent: var(--sun);
+  --accent-soft: #fff3c4;
+  --line: #2d2a26;
 }
 
 @theme inline {
+  --color-ink: var(--ink);
+  --color-cream: var(--cream);
+  --color-cream-deep: var(--cream-deep);
+  --color-electric: var(--electric);
+  --color-electric-foreground: var(--electric-foreground);
+  --color-sun: var(--sun);
+  --color-sun-foreground: var(--sun-foreground);
+  --color-danger: var(--danger);
+
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
-  --color-ink: var(--ink);
-  --color-ink-muted: var(--ink-muted);
   --color-brand: var(--brand);
   --color-brand-strong: var(--brand-strong);
   --color-brand-soft: var(--brand-soft);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
-  --color-sun: var(--sun);
   --color-line: var(--line);
-  --color-danger: var(--danger);
-  --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
-  --shadow-card: 0 20px 50px rgba(43, 65, 56, 0.08);
-  --shadow-float: 0 24px 60px rgba(31, 71, 56, 0.15);
+
+  --font-sans: var(--font-sans), "Hind", system-ui, sans-serif;
+  --font-display: var(--font-display), "Archivo Black", system-ui, sans-serif;
+  --font-brush: var(--font-brush), "Caveat Brush", cursive;
+
+  --shadow-card: 6px 6px 0 var(--ink);
+  --shadow-float: 8px 8px 0 var(--ink);
 }
 
 * {
@@ -48,10 +62,19 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background: var(--canvas);
+  background-color: var(--cream);
   color: var(--ink);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.92;
 }
 
 button,
@@ -71,22 +94,100 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent) 60%, white);
+  outline: 3px solid var(--electric);
   outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--accent-soft);
-  color: var(--brand-strong);
+  background: var(--sun);
+  color: var(--ink);
 }
 
 .text-balance {
   text-wrap: balance;
 }
 
-.passport-grid {
-  background-image: radial-gradient(circle at 1px 1px, rgba(25, 107, 82, 0.09) 1px, transparent 0);
-  background-size: 22px 22px;
+@utility font-brush {
+  font-family: var(--font-brush);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+@utility btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  &:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+}
+
+@utility btn-electric {
+  background: var(--electric);
+  color: var(--electric-foreground);
+}
+
+@utility btn-sun {
+  background: var(--sun);
+  color: var(--sun-foreground);
+}
+
+@utility btn-outline-ink {
+  background: #ffffff;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+}
+
+@utility edge-card {
+  background: #ffffff;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+@utility soft-card {
+  background: var(--cream-deep);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+}
+
+@utility stripe-warning {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--sun) 0 12px,
+    var(--ink) 12px 24px
+  );
+}
+
+@utility marquee-track {
+  display: inline-flex;
+  gap: 3rem;
+  white-space: nowrap;
+  animation: marquee 32s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

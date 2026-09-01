@@ -241,17 +241,20 @@ To connect a live Supabase project:
 
 - **Visual source of truth:** `VicenteBarrientos/doggy-world-design-system` (maintained via Lovable)
 - **Functional source of truth:** `VicenteBarrientos/doggy-world` (this repository)
-
-### Integration Rules:
-1. **Never merge repositories blindly.** Do not push backend/functional code to the design-system repo.
-2. **Decoupled Architecture:** Keep business logic, RLS, Supabase queries, and Server Actions separate from visual components.
-3. **Presentational Adoption:** Extract typography, color tokens, button styles, card treatments, and landing layout from `doggy-world-design-system` and map them to Doggy World typed components:
-   - `DogCard`
-   - `DogPassport`
-   - `Hero`
-   - `Navigation`
-   - `ProductCard`
-   - `FeatureCard`
+- **Status:** **Completed (First Pass)**
+  - **Typography:** Integrated `Archivo Black` (display/headings), `Caveat Brush` (handwritten accents), and `Hind` (body/sans) via `next/font/google`.
+  - **Color Tokens:** Integrated ink (`#1F1D1B`), cream (`#FBF9F3`), cream-deep (`#F3ECE0`), electric blue (`#0B50F5`), and sun yellow (`#FFD426`).
+  - **Design Elements:** Brutalist 2px ink borders, hard offset box-shadows (`shadow-[4px_4px_0_var(--ink)]`, `shadow-[6px_6px_0_var(--ink)]`), warning hazard stripes, and marquee banner.
+  - **Components Updated:**
+    - `Wordmark` with custom SVG paw icon over Doggy.
+    - `MarketingHeader`, `AppHeader`, and `MobileNav` with editorial shell and top announcement banner.
+    - Landing page (`src/app/page.tsx`) with hero dog photography, floating badges, bento grid, and FAQ accordion.
+    - Public Doggy Passport (`/dog/[slug]`).
+    - Dog Discovery (`/discover`).
+    - Owner Dashboard (`/dashboard`).
+    - Product Catalog & Details (`/products`, `/products/[id]`).
+    - Friend Requests (`/friend-requests`).
+    - Share profile modal (`/dog/[slug]#share`).
 
 ---
 

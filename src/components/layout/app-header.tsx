@@ -7,10 +7,10 @@ import { Button, buttonStyles } from "@/components/ui/button";
 
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-30 border-b border-line/80 bg-canvas/90 px-4 py-3 backdrop-blur-xl sm:px-6">
+    <header className="sticky top-0 z-30 border-b-2 border-ink bg-cream px-4 py-3 sm:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <Logo />
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Cuenta">
+        <nav className="hidden items-center gap-2 lg:flex" aria-label="Cuenta">
           <Link href="/dashboard" className={buttonStyles({ variant: "ghost", size: "sm" })}>
             Inicio
           </Link>
@@ -21,7 +21,7 @@ export function AppHeader() {
             Amigos
           </Link>
           <Link href="/discover" className={buttonStyles({ variant: "ghost", size: "sm" })}>
-            Descubrir
+            Comunidad
           </Link>
           <Link href="/settings" className={buttonStyles({ variant: "ghost", size: "sm" })}>
             Perfil

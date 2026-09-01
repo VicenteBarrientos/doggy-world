@@ -25,7 +25,7 @@ export function ProductVisual({
   return (
     <div
       className={cn(
-        "relative flex aspect-square items-center justify-center overflow-hidden rounded-[1.75rem] bg-accent-soft text-[#a45c2d]",
+        "relative flex aspect-square items-center justify-center overflow-hidden border-2 border-ink bg-cream-deep text-ink shadow-[2px_2px_0_var(--ink)]",
         className,
       )}
     >
@@ -35,10 +35,10 @@ export function ProductVisual({
           alt={`Foto de ${product.name}`}
           fill
           sizes="(max-width: 768px) 42vw, 240px"
-          className="object-cover"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
       ) : (
-        <Icon size={46} strokeWidth={1.6} aria-hidden="true" />
+        <Icon size={44} strokeWidth={1.6} aria-hidden="true" />
       )}
     </div>
   );

@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg";
 
 export function buttonStyles({
@@ -15,16 +15,20 @@ export function buttonStyles({
   className?: string;
 } = {}) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-200 disabled:cursor-not-allowed disabled:opacity-55",
+    "inline-flex items-center justify-center gap-2 rounded-sm font-display uppercase tracking-wide transition duration-150 disabled:cursor-not-allowed disabled:opacity-50",
     variant === "primary" &&
-      "bg-brand text-white shadow-[0_10px_24px_rgba(25,107,82,.2)] hover:-translate-y-0.5 hover:bg-brand-strong",
+      "border-2 border-ink bg-electric text-white shadow-[3px_3px_0_var(--ink)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_var(--ink)]",
     variant === "secondary" &&
-      "border border-line bg-white text-ink shadow-sm hover:-translate-y-0.5 hover:border-brand/30 hover:bg-brand-soft/40",
-    variant === "ghost" && "text-ink-muted hover:bg-surface-muted hover:text-ink",
-    variant === "danger" && "bg-red-50 text-danger hover:bg-red-100",
-    size === "sm" && "min-h-9 px-4 py-2 text-sm",
-    size === "md" && "min-h-11 px-5 py-2.5 text-sm",
-    size === "lg" && "min-h-13 px-7 py-3 text-base",
+      "border-2 border-ink bg-sun text-ink shadow-[3px_3px_0_var(--ink)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_var(--ink)]",
+    variant === "outline" &&
+      "border-2 border-ink bg-white text-ink shadow-[3px_3px_0_var(--ink)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_var(--ink)]",
+    variant === "ghost" &&
+      "border-2 border-transparent text-ink hover:border-ink hover:bg-cream-deep hover:shadow-[3px_3px_0_var(--ink)]",
+    variant === "danger" &&
+      "border-2 border-ink bg-danger text-white shadow-[3px_3px_0_var(--ink)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--ink)]",
+    size === "sm" && "min-h-9 px-3.5 py-1.5 text-xs",
+    size === "md" && "min-h-11 px-5 py-2.5 text-xs sm:text-sm",
+    size === "lg" && "min-h-13 px-7 py-3 text-sm sm:text-base",
     className,
   );
 }

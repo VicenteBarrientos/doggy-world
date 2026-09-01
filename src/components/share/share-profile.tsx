@@ -30,26 +30,61 @@ export function ShareProfile({ dogName, profileUrl }: { dogName: string; profile
 
   return (
     <div id="share">
-      <Button type="button" size="lg" onClick={() => setOpen(true)}>
-        <Share2 size={18} /> Compartir perfil
+      <Button type="button" variant="primary" size="md" onClick={() => setOpen(true)}>
+        <Share2 size={16} /> Compartir pasaporte
       </Button>
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#10241e]/55 p-3 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true" aria-labelledby="share-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
-          <div className="w-full max-w-md rounded-[2.5rem] bg-white p-6 shadow-float sm:p-8">
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-ink/60 p-4 backdrop-blur-sm sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="share-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setOpen(false);
+          }}
+        >
+          <div className="edge-card w-full max-w-md p-6 shadow-[8px_8px_0_var(--ink)] sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[0.15em] text-brand">Doggy Passport</p>
-                <h2 id="share-title" className="mt-2 font-display text-3xl font-semibold">Comparte a {dogName}</h2>
+                <p className="font-display text-xs uppercase tracking-widest text-electric">
+                  Doggy Passport
+                </p>
+                <h2 id="share-title" className="mt-1 font-display text-3xl uppercase">
+                  Comparte a {dogName}
+                </h2>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="flex size-10 items-center justify-center rounded-full bg-surface-muted" aria-label="Cerrar"><X size={19} /></button>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex size-9 items-center justify-center border-2 border-ink bg-cream text-ink shadow-[2px_2px_0_var(--ink)] transition hover:bg-sun"
+                aria-label="Cerrar"
+              >
+                <X size={18} />
+              </button>
             </div>
-            <div className="mx-auto mt-7 flex w-fit rounded-[2rem] border border-line bg-white p-5 shadow-card">
-              <QRCodeSVG value={profileUrl} size={210} level="M" marginSize={1} fgColor="#20352d" bgColor="#ffffff" title={`QR del perfil de ${dogName}`} />
+            <div className="mx-auto mt-6 flex w-fit border-2 border-ink bg-white p-4 shadow-[4px_4px_0_var(--ink)]">
+              <QRCodeSVG
+                value={profileUrl}
+                size={200}
+                level="M"
+                marginSize={1}
+                fgColor="#1f1d1b"
+                bgColor="#ffffff"
+                title={`QR del perfil de ${dogName}`}
+              />
             </div>
-            <p className="mt-5 text-center text-sm leading-6 text-ink-muted">Este QR abre el perfil público canónico de {dogName}. También puede imprimirse para un tag.</p>
+            <p className="mt-5 text-center text-xs leading-5 text-ink/75">
+              Este QR abre el pasaporte público canónico de {dogName}. También puede imprimirse
+              para su chapita o collar.
+            </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Button type="button" variant="secondary" onClick={copyLink}>{copied ? <Check size={17} /> : <Copy size={17} />}{copied ? "Copiado" : "Copiar enlace"}</Button>
-              <Button type="button" onClick={nativeShare}><Share2 size={17} /> Compartir</Button>
+              <Button type="button" variant="outline" size="sm" onClick={copyLink}>
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? "Copiado" : "Copiar enlace"}
+              </Button>
+              <Button type="button" variant="primary" size="sm" onClick={nativeShare}>
+                <Share2 size={16} /> Compartir
+              </Button>
             </div>
           </div>
         </div>

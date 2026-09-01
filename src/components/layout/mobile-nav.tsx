@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/dashboard", label: "Inicio", icon: Home },
-  { href: "/dashboard#dogs", label: "Mis perros", icon: PawPrint },
+  { href: "/dashboard#dogs", label: "Perros", icon: PawPrint },
   { href: "/friend-requests", label: "Amigos", icon: Users },
-  { href: "/discover", label: "Descubrir", icon: Compass },
+  { href: "/discover", label: "Comunidad", icon: Compass },
   { href: "/settings", label: "Perfil", icon: Settings },
 ];
 
@@ -18,7 +18,7 @@ export function MobileNav() {
   const pathname = usePathname();
   return (
     <nav
-      className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-[1.5rem] border border-line bg-white/95 p-1.5 shadow-float backdrop-blur-lg lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t-2 border-ink bg-cream p-1 shadow-[0_-4px_0_var(--ink)] lg:hidden"
       aria-label="Navegación de la cuenta"
     >
       {items.map(({ href, label, icon: Icon }) => {
@@ -29,11 +29,13 @@ export function MobileNav() {
             key={href}
             href={href}
             className={cn(
-              "flex min-h-13 flex-col items-center justify-center gap-1 rounded-[1.1rem] px-1 text-[10px] font-semibold transition",
-              active ? "bg-brand-soft text-brand-strong" : "text-ink-muted hover:text-ink",
+              "flex min-h-12 flex-col items-center justify-center gap-1 rounded-sm px-1 font-display text-[9px] uppercase tracking-wide transition",
+              active
+                ? "border-2 border-ink bg-sun text-ink shadow-[2px_2px_0_var(--ink)]"
+                : "text-ink hover:bg-cream-deep",
             )}
           >
-            <Icon size={19} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
+            <Icon size={18} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
             <span>{label}</span>
           </Link>
         );

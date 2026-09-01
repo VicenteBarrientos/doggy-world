@@ -1,17 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Geist } from "next/font/google";
+import { Archivo_Black, Caveat_Brush, Hind } from "next/font/google";
 
 import { absoluteUrl } from "@/lib/utils";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-sans",
+const archivoBlack = Archivo_Black({
+  weight: "400",
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
-const fraunces = Fraunces({
-  variable: "--font-display",
+const caveatBrush = Caveat_Brush({
+  weight: "400",
+  variable: "--font-brush",
+  subsets: ["latin"],
+});
+
+const hind = Hind({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -40,12 +48,15 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#fffaf2",
+  themeColor: "#FBF9F3",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${fraunces.variable}`}>
+    <html
+      lang="es"
+      className={`${archivoBlack.variable} ${caveatBrush.variable} ${hind.variable}`}
+    >
       <body>{children}</body>
     </html>
   );
