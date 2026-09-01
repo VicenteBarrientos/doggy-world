@@ -2,20 +2,65 @@
 
 ## Current Status
 
-**Social Layer V1 is complete and deployed to production.**
+**Explicit Public Demo Mode is complete and deployed to production.**
 
 - **Production URL:** https://doggy-world.vercel.app
-- **GitHub:** VicenteBarrientos/doggy-world (`main` @ `7430408`)
+- **GitHub:** VicenteBarrientos/doggy-world (`main` @ `888f9d4`)
+- **Vercel deployment:** `dpl_Fjtitu1SDCUBJpBeW21VQesbyRvU`
 - **Supabase project:** ugqblaoyfccozkjffoeg (hosted, fully migrated)
 
 ### Verification status (all green)
 - `npm run lint` — PASSED (0 errors, 0 warnings)
 - `npm run typecheck` — PASSED (0 TypeScript errors)
-- `npm run test` — PASSED (13 test files, 52/52 tests passing)
-- `npm run build` — PASSED (26 routes compiled cleanly, including all Social Layer routes)
-- Synthetic Social Layer E2E — PASSED (all 5 phases verified on hosted Supabase)
+- `npm run test` — PASSED (14 test files, 65/65 tests passing)
+- `npm run build` — PASSED (28 routes compiled cleanly)
+- Production E2E (automated) — PASSED (12/12 checks verified against live production)
 
 ---
+
+## VER DEMO Fix (commit 888f9d4)
+
+### Root Cause
+The `Ver demo` button linked to `/dashboard`. The proxy middleware called
+`supabase.auth.getUser()`, found no session (correct — the visitor isn't logged
+in), and redirected back to `/login`. The app had only one binary demo signal:
+`isSupabaseConfigured() === false`. In production with hosted Supabase, that is
+always `true`, so demo mode never fired for explicit visitors.
+
+### Architecture: Two Independent Demo Concepts
+
+| Concept | Trigger | Notes |
+|---|---|---|
+| **Automatic fallback** | `NEXT_PUBLIC_SUPABASE_URL/KEY` absent | Unchanged — local/dev resilience |
+| **Explicit public demo** | `demo_mode=1` HTTP-only session cookie | New — production-safe visitor demo |
+
+### Files Added
+- `src/lib/demo-cookie.ts` — `DEMO_COOKIE` constant, `isDemoCookieSet()`, session-cookie options (no maxAge)
+- `src/app/demo/route.ts` — `GET /demo`: sets cookie, redirects to `/dashboard`
+- `src/app/demo/exit/route.ts` — `GET /demo/exit`: clears cookie, redirects to `/sign-up`
+- `tests/demo-mode.test.ts` — 12 regression tests
+
+### Files Changed
+- `src/lib/supabase/proxy.ts` — demo cookie bypasses login redirect for protected routes; real Supabase user clears stale cookie immediately; added `/nearby`, `/match`, `/playdates`, `/messages` to `protectedPrefixes` (not `/discover`, `/products` — those remain public)
+- `src/lib/data/viewer.ts` — `getViewer()` checks real session first, then demo cookie; real user always wins
+- `src/lib/action-helpers.ts` — `requireActionUser()` now guards demo cookie too (not just no-Supabase case) — demo visitors cannot write to production tables
+- `src/app/actions/auth.ts` — clears demo cookie after successful login/signup
+- `src/app/auth/callback/route.ts` — clears demo cookie after OAuth callback
+- `src/components/layout/app-shell.tsx` — async; shows DemoBanner for both automatic and explicit demo
+- `src/components/layout/demo-banner.tsx` — added "Crear mi cuenta →" CTA linking to `/demo/exit`
+- `src/lib/i18n/es.ts` — added `demo.exit` string
+- `src/app/(auth)/layout.tsx` — `Ver demo` href: `/dashboard` → `/demo`
+- `src/app/page.tsx` — `Explorar demo` href: `/dashboard` → `/demo`
+
+### Security Properties
+- No fake Supabase session is created
+- RLS is never bypassed
+- No shared credentials in the browser
+- `requireActionUser()` throws for demo cookie — prevents any production write
+- `beta-feedback`, `dogs`, `friendships`, `preferences`, `profile`, `chat`, `matching`, `playdates`, `location` actions all guard through `requireActionUser()`
+- Real authenticated user always takes precedence and immediately clears stale demo cookie
+
+
 
 ## Completed Milestones
 
