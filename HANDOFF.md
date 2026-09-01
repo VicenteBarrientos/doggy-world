@@ -230,6 +230,39 @@ When `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set:
 
 ---
 
+## Real-User Beta Readiness (Completed & Deployed)
+
+- **Status:** **Ready for First Real-User Beta**
+- **First-Run Onboarding Flow:**
+  - **Paso 1 (Cuenta):** `/sign-up` con indicador de progreso editorial de 4 pasos (`OnboardingProgress`). Mensajes de error en español amigable.
+  - **Paso 2 & 3 (Tu perro & Foto):** `/dogs/new` simplificado con requisitos mínimos indispensables (Nombre, Raza/mezcla, Sexo opcional, Fecha de nacimiento opcional) y valores por defecto automáticos en `dogSchema` para campos avanzados.
+  - **Subida de foto prominente:** Selector de imagen con previsualización inmediata, validación de tipo (JPG, PNG, WebP) y peso (< 3 MB), y confirmación visual clara.
+  - **Paso 4 (Pasaporte creado):** Redirección inmediata a `/dog/${slug}?created=true` mostrando el pasaporte canónico con `CelebrationBanner` celebratorio y 3 acciones primarias:
+    1. *Compartir pasaporte* (Web Share API con fallback a copia en portapapeles y aviso "¡Enlace copiado!").
+    2. *Ver código QR* (modal brutalista con QR escaneable al pasaporte público).
+    3. *Completar perfil avanzado* (acceso directo a `/dogs/[id]/edit` para añadir peso, energía, sociabilidad y biografía).
+- **Estado de Dashboard para Usuarios Nuevos (Zero Dogs):**
+  - Si el usuario tiene 0 perros, el panel muestra un estado guiado dedicado: *"Creemos el pasaporte de tu perro"* con CTA directo para crear el pasaporte sin elementos confusos ni listas vacías.
+  - Usuarios con 1 o más perros continúan viendo el panel normal multi-perro con métricas y amigos.
+- **Analítica de Producto Consciente de la Privacidad (`src/lib/analytics.ts`):**
+  - Integración nativa de `@vercel/analytics` encapsulada en una abstracción segura `track(eventName, properties)`.
+  - Eventos instrumentados: `landing_view`, `signup_started`, `signup_completed`, `login_completed`, `dog_creation_started`, `dog_created`, `dog_photo_uploaded`, `passport_viewed_owner`, `passport_viewed_public`, `passport_share_opened`, `passport_qr_opened`, `friendship_request_sent`, `friendship_request_accepted`, `product_feedback_submitted`.
+  - Privacidad estricta: nunca se envían correos, contraseñas, tokens, notas privadas ni datos personales.
+- **Resiliencia ante Errores y Monitoreo:**
+  - Errores de Supabase Auth traducidos a español amigable (`friendlyAuthError`).
+  - Errores de base de datos sanitizados en `actionMessage` para nunca exponer detalles técnicos o de PostgreSQL al usuario.
+  - Botones con estado de carga para prevenir envíos dobles accidentales.
+- **Nueva Migración Timestamped:**
+  - `supabase/migrations/20260901010000_qualify_storage_dog_photos_policy.sql` aplicada en Supabase hosted para calificar `storage.objects.name` en la política RLS de lectura de fotos, permitiendo el acceso anónimo seguro a fotos de perros públicos.
+- **Pruebas y Calidad:**
+  - 6 archivos de test, 24/24 pruebas unitarias pasando en Vitest (`tests/onboarding.test.tsx` añadido).
+  - `npm run lint` pasando con 0 advertencias y 0 errores.
+  - `npm run typecheck` pasando con 0 errores.
+  - `npm run build` compilando las 17 rutas con Turbopack.
+  - Script E2E en vivo (`scratch/live-beta-test.js`) ejecutado contra `https://doggy-world.vercel.app` confirmando el flujo completo.
+
+---
+
 ## Vercel Setup (Connected & Deployed)
 
 - **Production URL:** [https://doggy-world.vercel.app](https://doggy-world.vercel.app)
