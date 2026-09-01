@@ -7,6 +7,7 @@ import {
   calculateProfileCompleteness,
   canonicalFriendshipPair,
   formatAge,
+  sexLabel,
   slugify,
 } from "@/lib/utils";
 
@@ -54,5 +55,12 @@ describe("dog identity utilities", () => {
     expect(() => canonicalFriendshipPair("dog-a", "dog-a")).toThrow(
       "Un perro no puede agregarse a sí mismo.",
     );
+  });
+
+  it("formats known dog sex values for Spanish public UI and omits unknown values", () => {
+    expect(sexLabel("male")).toBe("Macho");
+    expect(sexLabel("female")).toBe("Hembra");
+    expect(sexLabel("unknown")).toBeNull();
+    expect(sexLabel(null)).toBeNull();
   });
 });

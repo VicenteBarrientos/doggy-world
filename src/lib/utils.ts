@@ -85,6 +85,12 @@ export function personalityLabel(tag: string) {
   return option ? `${option.emoji} ${option.label}` : tag.replaceAll("_", " ");
 }
 
+export function sexLabel(sex: Dog["sex"] | null | undefined) {
+  if (sex === "male") return "Macho";
+  if (sex === "female") return "Hembra";
+  return null;
+}
+
 export function canonicalFriendshipPair(firstDogId: string, secondDogId: string) {
   if (firstDogId === secondDogId) {
     throw new Error("Un perro no puede agregarse a sí mismo.");

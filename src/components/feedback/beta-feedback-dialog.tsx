@@ -4,9 +4,10 @@ import { Check, LoaderCircle, MessageSquare, Send, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 
-import { betaFeedbackCategories, submitBetaFeedbackAction } from "@/app/actions/beta-feedback";
+import { submitBetaFeedbackAction } from "@/app/actions/beta-feedback";
 import { Button } from "@/components/ui/button";
 import { FieldError, FormStatus } from "@/components/ui/form-feedback";
+import { betaFeedbackCategories } from "@/lib/beta-feedback";
 import { initialActionState } from "@/lib/forms";
 import { track } from "@/lib/analytics";
 

@@ -7,6 +7,13 @@ import {
   requireActionUser,
   stringValue,
 } from "@/lib/action-helpers";
+import {
+  recordDemoFriendRequest,
+  removeDemoFriendship,
+  respondDemoFriendRequest,
+} from "@/lib/data/friendships";
+import { getViewer } from "@/lib/data/viewer";
+import { demoDogs } from "@/lib/demo-data";
 import { fieldErrorsFromZod, type ActionState } from "@/lib/forms";
 import { friendRequestSchema, friendshipResponseSchema } from "@/lib/validation";
 
@@ -27,6 +34,26 @@ export async function sendFriendRequestAction(
   }
 
   try {
+    const viewer = await getViewer();
+    if (viewer?.isDemo) {
+      const requester = demoDogs.find(
+        (dog) => dog.id === parsed.data.requesterDogId && dog.owner_id === viewer.id,
+      );
+      const recipient = demoDogs.find(
+        (dog) => dog.id === parsed.data.recipientDogId && dog.is_public,
+      );
+      if (!requester) throw new Error("Elige uno de tus perros demo.");
+      if (!recipient || recipient.owner_id === viewer.id) {
+        throw new Error("Este pasaporte demo ya no acepta solicitudes.");
+      }
+
+      const result = recordDemoFriendRequest(requester.id, recipient.id);
+      if (!result.ok) throw new Error(result.message);
+
+      revalidatePath("/friend-requests");
+      return { status: "success", message: "Solicitud demo enviada 🐾" };
+    }
+
     const { supabase, user } = await requireActionUser();
     const [{ data: requester }, { data: recipient }] = await Promise.all([
       supabase
@@ -69,6 +96,21 @@ export async function respondToFriendRequestAction(formData: FormData) {
   });
   if (!parsed.success) return;
 
+  const viewer = await getViewer();
+  if (viewer?.isDemo) {
+    const ownerDogIds = demoDogs
+      .filter((dog) => dog.owner_id === viewer.id)
+      .map((dog) => dog.id);
+    respondDemoFriendRequest(
+      parsed.data.friendshipId,
+      ownerDogIds,
+      parsed.data.status,
+    );
+    revalidatePath("/friend-requests");
+    revalidatePath("/dashboard");
+    return;
+  }
+
   const { supabase, user } = await requireActionUser();
   const { data: friendship } = await supabase
     .from("dog_friendships")
@@ -97,6 +139,16 @@ export async function respondToFriendRequestAction(formData: FormData) {
 export async function removeFriendshipAction(formData: FormData) {
   const friendshipId = stringValue(formData, "friendshipId");
   const dogId = stringValue(formData, "dogId");
+  const viewer = await getViewer();
+  if (viewer?.isDemo) {
+    const ownerDogIds = demoDogs
+      .filter((dog) => dog.owner_id === viewer.id)
+      .map((dog) => dog.id);
+    removeDemoFriendship(friendshipId, ownerDogIds);
+    revalidatePath(`/dogs/${dogId}/friends`);
+    return;
+  }
+
   const { supabase, user } = await requireActionUser();
   const { data: friendship } = await supabase
     .from("dog_friendships")

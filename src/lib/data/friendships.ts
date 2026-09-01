@@ -12,6 +12,64 @@ export type FriendRequestView = {
   recipient: DogWithPhoto;
 };
 
+export function recordDemoFriendRequest(requesterDogId: string, recipientDogId: string) {
+  const duplicate = demoFriendships.some(
+    (friendship) =>
+      (friendship.requester_dog_id === requesterDogId &&
+        friendship.recipient_dog_id === recipientDogId) ||
+      (friendship.requester_dog_id === recipientDogId &&
+        friendship.recipient_dog_id === requesterDogId),
+  );
+
+  if (duplicate) {
+    return { ok: false, message: "Estos perros ya tienen una solicitud o amistad demo." };
+  }
+
+  const now = new Date().toISOString();
+  demoFriendships.unshift({
+    id: crypto.randomUUID(),
+    requester_dog_id: requesterDogId,
+    recipient_dog_id: recipientDogId,
+    status: "pending",
+    created_at: now,
+    updated_at: now,
+    responded_at: null,
+  });
+  return { ok: true };
+}
+
+export function respondDemoFriendRequest(
+  friendshipId: string,
+  ownerDogIds: string[],
+  status: "accepted" | "declined" | "blocked",
+) {
+  const friendship = demoFriendships.find(
+    (item) =>
+      item.id === friendshipId &&
+      item.status === "pending" &&
+      ownerDogIds.includes(item.recipient_dog_id),
+  );
+  if (!friendship) return false;
+
+  const now = new Date().toISOString();
+  friendship.status = status;
+  friendship.responded_at = now;
+  friendship.updated_at = now;
+  return true;
+}
+
+export function removeDemoFriendship(friendshipId: string, ownerDogIds: string[]) {
+  const index = demoFriendships.findIndex(
+    (friendship) =>
+      friendship.id === friendshipId &&
+      (ownerDogIds.includes(friendship.requester_dog_id) ||
+        ownerDogIds.includes(friendship.recipient_dog_id)),
+  );
+  if (index === -1) return false;
+  demoFriendships.splice(index, 1);
+  return true;
+}
+
 export async function getFriendRequests(): Promise<FriendRequestView[]> {
   const viewer = await requireViewer();
   const ownerDogs = viewer.isDemo

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { calculateMatchCompatibility } from "@/lib/match-heuristic";
 import { recordMatchAction } from "@/app/actions/matching";
+import { recordDemoMatchAction } from "@/lib/data/matching";
+import { demoDogs } from "@/lib/demo-data";
 import { initialActionState } from "@/lib/forms";
 import type { Dog } from "@/types/database";
 
@@ -62,5 +64,9 @@ describe("Doggy Match Heuristic & Constraints", () => {
     const result = await recordMatchAction(initialActionState, fd);
     expect(result.status).toBe("error");
     expect(result.message).toContain("consigo mismo");
+  });
+
+  it("creates the deterministic demo mutual match with a reachable candidate", () => {
+    expect(recordDemoMatchAction(demoDogs[0].id, demoDogs[2].id, "like")).toBe(true);
   });
 });

@@ -15,9 +15,10 @@ const demoMutualMatches = new Set<string>(); // `${least(a, b)}:${greatest(a, b)
 export function recordDemoMatchAction(fromDogId: string, toDogId: string, action: "like" | "pass"): boolean {
   demoMatchActions.add(`${fromDogId}:${toDogId}`);
   if (action === "like") {
-    // If reverse like exists, or if liking Luna/Coco in demo, create mutual match!
+    // If a reverse like exists, or if liking Coco in demo, create a mutual match.
+    // Coco is owned by another demo profile and therefore appears in Rocky's deck.
     const reverseKey = `${toDogId}:${fromDogId}`;
-    const isReverseLiked = demoMatchActions.has(reverseKey) || toDogId === demoDogs[1].id;
+    const isReverseLiked = demoMatchActions.has(reverseKey) || toDogId === demoDogs[2].id;
     if (isReverseLiked) {
       const pairKey = fromDogId < toDogId ? `${fromDogId}:${toDogId}` : `${toDogId}:${fromDogId}`;
       demoMutualMatches.add(pairKey);

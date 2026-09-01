@@ -17,7 +17,7 @@ import { buttonStyles } from "@/components/ui/button";
 import { energyOptions, preferenceCategoryLabels, sociabilityOptions } from "@/lib/constants";
 import { getOwnerDogs, getPublicDog } from "@/lib/data/dogs";
 import { getViewer } from "@/lib/data/viewer";
-import { absoluteUrl, formatAge, formatWeight, personalityLabel } from "@/lib/utils";
+import { absoluteUrl, formatAge, formatWeight, personalityLabel, sexLabel } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -46,6 +46,7 @@ export default async function PublicDogPage({ params, searchParams }: Props) {
   const canRequest = viewer?.id !== dog.owner_id;
   const energy = energyOptions.find((item) => item.value === dog.energy_level)?.label;
   const sociability = sociabilityOptions.find((item) => item.value === dog.sociability)?.label;
+  const sex = sexLabel(dog.sex);
   const profileUrl = absoluteUrl(`/dog/${dog.slug}`);
 
   return (
@@ -95,6 +96,7 @@ export default async function PublicDogPage({ params, searchParams }: Props) {
                   </h1>
                   <p className="mt-2 text-lg text-ink/80">
                     {dog.breed} · {formatAge(dog.birth_date)}
+                    {sex ? ` · ${sex}` : ""}
                   </p>
                   {dog.city ? (
                     <p className="mt-2 flex items-center gap-2 text-sm text-ink/70">

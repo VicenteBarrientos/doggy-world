@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { actionMessage, requireActionUser, stringValue } from "@/lib/action-helpers";
+import { getViewer } from "@/lib/data/viewer";
 import { type ActionState } from "@/lib/forms";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { recordDemoPlaydate, respondDemoPlaydate } from "@/lib/data/playdates";
 import { demoDogs } from "@/lib/demo-data";
 
@@ -56,6 +56,58 @@ export async function createPlaydateAction(
   }
 
   try {
+    const viewer = await getViewer();
+    if (viewer?.isDemo) {
+      const host = demoDogs.find(
+        (dog) => dog.id === parsed.data.hostDogId && dog.owner_id === viewer.id,
+      );
+      const guest = demoDogs.find(
+        (dog) => dog.id === parsed.data.invitedDogId && dog.is_public,
+      );
+
+      if (!host) {
+        return { status: "error", message: "Elige uno de tus perros demo." };
+      }
+      if (!guest || guest.owner_id === viewer.id) {
+        return { status: "error", message: "El perro invitado no está disponible en la demo." };
+      }
+
+      const now = new Date().toISOString();
+      const newId = crypto.randomUUID();
+      recordDemoPlaydate({
+        id: newId,
+        host_dog_id: host.id,
+        title: parsed.data.title,
+        starts_at: new Date(parsed.data.startsAt).toISOString(),
+        ends_at: null,
+        city: parsed.data.city,
+        location_label: parsed.data.locationLabel,
+        meeting_point: null,
+        notes: parsed.data.notes ?? null,
+        status: "scheduled",
+        created_at: now,
+        updated_at: now,
+        host_dog: host,
+        participants: [
+          {
+            id: crypto.randomUUID(),
+            playdate_id: newId,
+            dog_id: guest.id,
+            status: "invited",
+            invited_at: now,
+            responded_at: null,
+            dog: guest,
+          },
+        ],
+      });
+
+      revalidatePath("/playdates");
+      return {
+        status: "success",
+        message: "¡Playdate demo organizado e invitación enviada!",
+      };
+    }
+
     const { supabase, user } = await requireActionUser();
 
     // Verify ownership of host dog
@@ -70,66 +122,34 @@ export async function createPlaydateAction(
       throw new Error("No tienes permisos para organizar un playdate con este perro.");
     }
 
-    if (isSupabaseConfigured()) {
-      const { data: newPlaydate, error: pErr } = await supabase
-        .from("playdates")
-        .insert({
-          host_dog_id: parsed.data.hostDogId,
-          title: parsed.data.title,
-          starts_at: new Date(parsed.data.startsAt).toISOString(),
-          city: parsed.data.city,
-          location_label: parsed.data.locationLabel,
-          notes: parsed.data.notes,
-          status: "scheduled",
-        })
-        .select("id")
-        .single();
-
-      if (pErr || !newPlaydate) {
-        console.error("[Create Playdate Error]", pErr);
-        throw new Error("No pudimos crear el playdate.");
-      }
-
-      const { error: partErr } = await supabase.from("playdate_participants").insert({
-        playdate_id: newPlaydate.id,
-        dog_id: parsed.data.invitedDogId,
-        status: "invited",
-      });
-
-      if (partErr) {
-        console.error("[Playdate Participant Error]", partErr);
-        throw new Error("No pudimos enviar la invitación al playdate.");
-      }
-    } else {
-      const host = demoDogs.find((d) => d.id === parsed.data.hostDogId) || demoDogs[0];
-      const guest = demoDogs.find((d) => d.id === parsed.data.invitedDogId) || demoDogs[1];
-      const newId = `demo-p-${Date.now()}`;
-      recordDemoPlaydate({
-        id: newId,
-        host_dog_id: host.id,
+    const { data: newPlaydate, error: pErr } = await supabase
+      .from("playdates")
+      .insert({
+        host_dog_id: parsed.data.hostDogId,
         title: parsed.data.title,
         starts_at: new Date(parsed.data.startsAt).toISOString(),
-        ends_at: null,
         city: parsed.data.city,
         location_label: parsed.data.locationLabel,
-        meeting_point: null,
-        notes: parsed.data.notes ?? null,
+        notes: parsed.data.notes,
         status: "scheduled",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        host_dog: host,
-        participants: [
-          {
-            id: `demo-pt-${Date.now()}`,
-            playdate_id: newId,
-            dog_id: guest.id,
-            status: "invited",
-            invited_at: new Date().toISOString(),
-            responded_at: null,
-            dog: guest,
-          },
-        ],
-      });
+      })
+      .select("id")
+      .single();
+
+    if (pErr || !newPlaydate) {
+      console.error("[Create Playdate Error]", pErr);
+      throw new Error("No pudimos crear el playdate.");
+    }
+
+    const { error: partErr } = await supabase.from("playdate_participants").insert({
+      playdate_id: newPlaydate.id,
+      dog_id: parsed.data.invitedDogId,
+      status: "invited",
+    });
+
+    if (partErr) {
+      console.error("[Playdate Participant Error]", partErr);
+      throw new Error("No pudimos enviar la invitación al playdate.");
     }
 
     revalidatePath("/playdates");
@@ -155,6 +175,27 @@ export async function respondPlaydateInviteAction(
   }
 
   try {
+    const viewer = await getViewer();
+    if (viewer?.isDemo) {
+      const ownedDog = demoDogs.find(
+        (dog) => dog.id === dogId && dog.owner_id === viewer.id,
+      );
+      if (!ownedDog) {
+        return { status: "error", message: "No puedes responder por este perro demo." };
+      }
+
+      const updated = respondDemoPlaydate(playdateId, dogId, response);
+      if (!updated) {
+        return { status: "error", message: "La invitación demo ya no está disponible." };
+      }
+
+      revalidatePath("/playdates");
+      return {
+        status: "success",
+        message: response === "accepted" ? "¡Invitación aceptada!" : "Invitación declinada.",
+      };
+    }
+
     const { supabase, user } = await requireActionUser();
 
     // Verify ownership of the invited dog
@@ -169,21 +210,17 @@ export async function respondPlaydateInviteAction(
       throw new Error("No tienes permisos para responder por este perro.");
     }
 
-    if (isSupabaseConfigured()) {
-      const { error } = await supabase
-        .from("playdate_participants")
-        .update({
-          status: response,
-          responded_at: new Date().toISOString(),
-        })
-        .eq("playdate_id", playdateId)
-        .eq("dog_id", dogId);
+    const { error } = await supabase
+      .from("playdate_participants")
+      .update({
+        status: response,
+        responded_at: new Date().toISOString(),
+      })
+      .eq("playdate_id", playdateId)
+      .eq("dog_id", dogId);
 
-      if (error) {
-        throw new Error("No pudimos actualizar la respuesta.");
-      }
-    } else {
-      respondDemoPlaydate(playdateId, dogId, response);
+    if (error) {
+      throw new Error("No pudimos actualizar la respuesta.");
     }
 
     revalidatePath("/playdates");

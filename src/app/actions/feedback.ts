@@ -9,6 +9,8 @@ import {
   requireActionUser,
   stringValue,
 } from "@/lib/action-helpers";
+import { getViewer } from "@/lib/data/viewer";
+import { demoDogs, demoProducts } from "@/lib/demo-data";
 import { fieldErrorsFromZod, type ActionState } from "@/lib/forms";
 import { productFeedbackSchema } from "@/lib/validation";
 
@@ -39,6 +41,23 @@ export async function saveProductFeedbackAction(
   }
 
   try {
+    const viewer = await getViewer();
+    if (viewer?.isDemo) {
+      const dog = demoDogs.find(
+        (item) => item.id === parsed.data.dogId && item.owner_id === viewer.id,
+      );
+      const product = demoProducts.find(
+        (item) => item.id === parsed.data.productId && item.is_active,
+      );
+      if (!dog) throw new Error("Elige uno de tus perros demo.");
+      if (!product) throw new Error("Este producto demo ya no está disponible.");
+
+      return {
+        status: "success",
+        message: "¡Opinión registrada en esta sesión demo!",
+      };
+    }
+
     const { supabase, user } = await requireActionUser();
     const [{ data: dog }, { data: product }] = await Promise.all([
       supabase

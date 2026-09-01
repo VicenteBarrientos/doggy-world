@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -20,7 +20,7 @@ import { recordMatchAction } from "@/app/actions/matching";
 import { DogAvatar } from "@/components/dogs/dog-avatar";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
-import { formatAge, personalityLabel } from "@/lib/utils";
+import { formatAge, personalityLabel, sexLabel } from "@/lib/utils";
 import type { DogWithPhoto, MatchCandidateDog } from "@/types/database";
 
 type MatchDeckProps = {
@@ -32,18 +32,19 @@ export function MatchDeck({ activeDog, initialCandidates }: MatchDeckProps) {
   const candidates = initialCandidates;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mutualMatchDog, setMutualMatchDog] = useState<MatchCandidateDog | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const submittingRef = useRef(false);
 
   const currentCandidate = candidates[currentIndex];
+  const currentSex = sexLabel(currentCandidate?.sex);
 
   function handleAction(action: "like" | "pass") {
-    if (!currentCandidate || isPending) return;
+    if (!currentCandidate || isPending || submittingRef.current) return;
 
     const candidate = currentCandidate;
-    track(action === "like" ? "match_liked" : "match_passed", {
-      score: candidate.compatibility_score,
-      breed: candidate.breed,
-    });
+    submittingRef.current = true;
+    setActionError(null);
 
     const fd = new FormData();
     fd.set("fromDogId", activeDog.id);
@@ -51,12 +52,33 @@ export function MatchDeck({ activeDog, initialCandidates }: MatchDeckProps) {
     fd.set("action", action);
 
     startTransition(async () => {
-      const result = await recordMatchAction({ status: "idle" }, fd);
-      if (result.isMutualMatch) {
-        track("match_created");
-        setMutualMatchDog(candidate);
+      try {
+        const result = await recordMatchAction({ status: "idle" }, fd);
+        if (result.status !== "success") {
+          setActionError(
+            result.message ?? "No pudimos registrar tu decisión. Inténtalo nuevamente.",
+          );
+          return;
+        }
+
+        track(action === "like" ? "match_liked" : "match_passed", {
+          score: candidate.compatibility_score,
+          breed: candidate.breed,
+        });
+
+        if (result.isMutualMatch) {
+          track("match_created");
+          setMutualMatchDog(candidate);
+        }
+        setCurrentIndex((prev) => prev + 1);
+      } catch (error) {
+        console.error("[Match Action Client Error]", error);
+        setActionError(
+          "No pudimos registrar tu decisión. Revisa tu conexión e inténtalo nuevamente.",
+        );
+      } finally {
+        submittingRef.current = false;
       }
-      setCurrentIndex((prev) => prev + 1);
     });
   }
 
@@ -119,6 +141,11 @@ export function MatchDeck({ activeDog, initialCandidates }: MatchDeckProps) {
                 <span className="border border-ink bg-cream px-2.5 py-1 font-display text-xs uppercase text-ink">
                   Tamaño {currentCandidate.size}
                 </span>
+                {currentSex ? (
+                  <span className="border border-ink bg-cream px-2.5 py-1 font-display text-xs uppercase text-ink">
+                    {currentSex}
+                  </span>
+                ) : null}
               </div>
 
               {/* Personality tags */}
@@ -175,6 +202,15 @@ export function MatchDeck({ activeDog, initialCandidates }: MatchDeckProps) {
                 )}
                 <span>ME GUSTA</span>
               </Button>
+              {actionError ? (
+                <p
+                  role="alert"
+                  aria-live="polite"
+                  className="col-span-2 border-2 border-danger bg-white px-3 py-2 text-xs font-semibold text-danger"
+                >
+                  {actionError}
+                </p>
+              ) : null}
             </div>
           </div>
         </div>

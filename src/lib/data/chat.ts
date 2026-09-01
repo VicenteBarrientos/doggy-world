@@ -41,9 +41,20 @@ const demoMessages: DogMessage[] = [
   },
 ];
 
-export function recordDemoMessage(conversationId: string, senderDogId: string, body: string): DogMessage {
+export function recordDemoMessage(
+  conversationId: string,
+  senderDogId: string,
+  body: string,
+): DogMessage | null {
+  const conv = demoConversations.find(
+    (conversation) =>
+      conversation.id === conversationId &&
+      (conversation.dog_a_id === senderDogId || conversation.dog_b_id === senderDogId),
+  );
+  if (!conv) return null;
+
   const msg: DogMessage = {
-    id: `m-demo-${Date.now()}`,
+    id: crypto.randomUUID(),
     conversation_id: conversationId,
     sender_dog_id: senderDogId,
     body,
@@ -51,10 +62,7 @@ export function recordDemoMessage(conversationId: string, senderDogId: string, b
   };
   demoMessages.push(msg);
 
-  const conv = demoConversations.find((c) => c.id === conversationId);
-  if (conv) {
-    conv.last_message_at = msg.created_at;
-  }
+  conv.last_message_at = msg.created_at;
   return msg;
 }
 
@@ -65,7 +73,7 @@ export function getOrCreateDemoConversation(dogAId: string, dogBId: string) {
   let conv = demoConversations.find((c) => c.dog_a_id === a && c.dog_b_id === b);
   if (!conv) {
     conv = {
-      id: `c-demo-${Date.now()}`,
+      id: crypto.randomUUID(),
       dog_a_id: a,
       dog_b_id: b,
       created_at: new Date().toISOString(),

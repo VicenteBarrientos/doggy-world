@@ -9,8 +9,8 @@ import {
   requireActionUser,
   stringValue,
 } from "@/lib/action-helpers";
+import { getViewer } from "@/lib/data/viewer";
 import { type ActionState } from "@/lib/forms";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 const locationSchema = z.object({
   dogId: z.string().uuid("Selecciona un perro válido."),
@@ -44,6 +44,14 @@ export async function saveDogLocationAction(
   }
 
   try {
+    const viewer = await getViewer();
+    if (viewer?.isDemo) {
+      return {
+        status: "success",
+        message: "Ubicación demo actualizada temporalmente.",
+      };
+    }
+
     const { supabase, user } = await requireActionUser();
     const { data: dog } = await supabase
       .from("dogs")
@@ -56,24 +64,22 @@ export async function saveDogLocationAction(
       throw new Error("No tienes permisos para actualizar este perro.");
     }
 
-    if (isSupabaseConfigured()) {
-      const pointWkt = `POINT(${parsed.data.lng} ${parsed.data.lat})`;
-      const { error } = await supabase.from("dog_locations").upsert(
-        {
-          dog_id: parsed.data.dogId,
-          location: pointWkt,
-          nearby_enabled: parsed.data.nearbyEnabled,
-          city: parsed.data.city,
-          location_label: parsed.data.locationLabel,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "dog_id" },
-      );
+    const pointWkt = `POINT(${parsed.data.lng} ${parsed.data.lat})`;
+    const { error } = await supabase.from("dog_locations").upsert(
+      {
+        dog_id: parsed.data.dogId,
+        location: pointWkt,
+        nearby_enabled: parsed.data.nearbyEnabled,
+        city: parsed.data.city,
+        location_label: parsed.data.locationLabel,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "dog_id" },
+    );
 
-      if (error) {
-        console.error("[Location Save Error]", error);
-        throw new Error("No pudimos guardar tu ubicación en este momento.");
-      }
+    if (error) {
+      console.error("[Location Save Error]", error);
+      throw new Error("No pudimos guardar tu ubicación en este momento.");
     }
 
     revalidatePath("/nearby");
@@ -99,6 +105,16 @@ export async function toggleNearbyVisibilityAction(
   }
 
   try {
+    const viewer = await getViewer();
+    if (viewer?.isDemo) {
+      return {
+        status: "success",
+        message: enabled
+          ? "Visibilidad demo activada temporalmente."
+          : "Visibilidad demo desactivada temporalmente.",
+      };
+    }
+
     const { supabase, user } = await requireActionUser();
     const { data: dog } = await supabase
       .from("dogs")
@@ -111,18 +127,16 @@ export async function toggleNearbyVisibilityAction(
       throw new Error("No tienes permisos para este perro.");
     }
 
-    if (isSupabaseConfigured()) {
-      const { error } = await supabase
-        .from("dog_locations")
-        .update({
-          nearby_enabled: enabled,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("dog_id", dogId);
+    const { error } = await supabase
+      .from("dog_locations")
+      .update({
+        nearby_enabled: enabled,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("dog_id", dogId);
 
-      if (error) {
-        throw new Error("No pudimos actualizar la visibilidad cercana.");
-      }
+    if (error) {
+      throw new Error("No pudimos actualizar la visibilidad cercana.");
     }
 
     revalidatePath("/nearby");

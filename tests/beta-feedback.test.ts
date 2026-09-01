@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  betaFeedbackCategories,
-  submitBetaFeedbackAction,
-} from "@/app/actions/beta-feedback";
+import { submitBetaFeedbackAction } from "@/app/actions/beta-feedback";
+import { betaFeedbackCategories } from "@/lib/beta-feedback";
 import { initialActionState } from "@/lib/forms";
 
 describe("Beta Feedback Action", () => {
@@ -15,15 +13,15 @@ describe("Beta Feedback Action", () => {
     expect(betaFeedbackCategories).toContain("Otro");
   });
 
-  it("rejects feedback submission if user is not authenticated", async () => {
+  it("accepts feedback as a no-op in automatic demo fallback", async () => {
     const formData = new FormData();
     formData.set("message", "Excelente diseño y rapidez!");
     formData.set("category", "Me gustó algo");
 
     const result = await submitBetaFeedbackAction(initialActionState, formData);
-    expect(result.status).toBe("error");
+    expect(result.status).toBe("success");
     expect(result.message).toBeDefined();
-    expect(result.message ?? "").toMatch(/Debes iniciar sesión|La vista demo/);
+    expect(result.message ?? "").toMatch(/sesión demo/);
   });
 
   it("validates that empty or very short messages are rejected", async () => {
@@ -31,7 +29,6 @@ describe("Beta Feedback Action", () => {
     formData.set("message", "ok"); // Less than 3 characters
 
     const result = await submitBetaFeedbackAction(initialActionState, formData);
-    // Since unauthenticated check runs first in action, it safely halts
     expect(result.status).toBe("error");
   });
 });

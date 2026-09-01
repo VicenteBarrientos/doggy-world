@@ -4,7 +4,7 @@ import Link from "next/link";
 import { DogAvatar } from "@/components/dogs/dog-avatar";
 import { Badge } from "@/components/ui/badge";
 import { energyOptions, sociabilityOptions } from "@/lib/constants";
-import { formatAge, personalityLabel } from "@/lib/utils";
+import { formatAge, personalityLabel, sexLabel } from "@/lib/utils";
 import type { DogWithPhoto } from "@/types/database";
 
 export function DogCard({
@@ -20,6 +20,7 @@ export function DogCard({
   const sociability = sociabilityOptions.find(
     (option) => option.value === dog.sociability,
   )?.label;
+  const sex = sexLabel(dog.sex);
   const destination = href ?? (publicView ? `/dog/${dog.slug}` : `/dogs/${dog.id}`);
 
   return (
@@ -44,6 +45,7 @@ export function DogCard({
             <h3 className="font-display text-2xl uppercase tracking-[-0.02em]">{dog.name}</h3>
             <p className="mt-0.5 text-xs text-ink/75">
               {dog.breed} · {formatAge(dog.birth_date)}
+              {sex ? ` · ${sex}` : ""}
             </p>
           </div>
           {dog.is_public ? <Badge tone="electric">Público</Badge> : <Badge>Privado</Badge>}

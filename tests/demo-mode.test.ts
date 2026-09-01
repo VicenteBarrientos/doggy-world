@@ -140,13 +140,13 @@ describe("requireActionUser() — demo mutation guard", () => {
   });
 });
 
-// ── 4. Beta feedback action — demo cookie guard ──────────────────────────────
-describe("submitBetaFeedbackAction() — demo protection", () => {
+// ── 4. Beta feedback action — demo-first routing ─────────────────────────────
+describe("submitBetaFeedbackAction() — demo routing", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("rejects feedback submission with demo cookie present (cannot write to Supabase)", async () => {
+  it("accepts feedback as a no-op with a demo cookie (cannot write to Supabase)", async () => {
     mockCookies(true);
 
     // Supabase appears configured so the demo-cookie guard is the relevant one
@@ -160,14 +160,14 @@ describe("submitBetaFeedbackAction() — demo protection", () => {
     formData.set("category", "Me gustó algo");
 
     const result = await submitBetaFeedbackAction(initialActionState, formData);
-    expect(result.status).toBe("error");
-    expect(result.message).toMatch(/La vista demo no guarda cambios/);
+    expect(result.status).toBe("success");
+    expect(result.message).toMatch(/sesión demo/);
 
     process.env.NEXT_PUBLIC_SUPABASE_URL = origUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = origKey;
   });
 
-  it("rejects feedback with no Supabase configured (automatic fallback)", async () => {
+  it("accepts feedback as a no-op with no Supabase configured (automatic fallback)", async () => {
     mockCookies(false);
 
     const origUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -180,8 +180,8 @@ describe("submitBetaFeedbackAction() — demo protection", () => {
     formData.set("category", "Me gustó algo");
 
     const result = await submitBetaFeedbackAction(initialActionState, formData);
-    expect(result.status).toBe("error");
-    expect(result.message).toMatch(/La vista demo no guarda cambios/);
+    expect(result.status).toBe("success");
+    expect(result.message).toMatch(/sesión demo/);
 
     process.env.NEXT_PUBLIC_SUPABASE_URL = origUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = origKey;

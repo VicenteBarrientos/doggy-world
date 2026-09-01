@@ -67,15 +67,21 @@ export function recordDemoPlaydate(playdate: PlaydateWithDetails) {
   demoPlaydates.unshift(playdate);
 }
 
-export function respondDemoPlaydate(playdateId: string, dogId: string, status: "accepted" | "declined") {
+export function respondDemoPlaydate(
+  playdateId: string,
+  dogId: string,
+  status: "accepted" | "declined",
+) {
   const p = demoPlaydates.find((d) => d.id === playdateId);
   if (p) {
     const part = p.participants.find((pt) => pt.dog_id === dogId);
     if (part) {
       part.status = status;
       part.responded_at = new Date().toISOString();
+      return true;
     }
   }
+  return false;
 }
 
 export async function getDogPlaydates(dogId: string): Promise<{
