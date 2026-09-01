@@ -181,8 +181,14 @@ All application data is defined in `supabase/migrations/20260901000000_initial_d
 
 When `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are not set:
 - The app enters deterministic demo mode automatically.
-- A prominent banner appears: *"Estás viendo la experiencia demo. Conecta Supabase para guardar cambios y probar cuentas reales."*
-- Sample dogs (Rocky, Luna, Coco, Milo), preferences, products, and friendships are loaded from `src/lib/demo-data.ts`.
+- A prominent banner appears: *"Modo demo — estás explorando datos sintéticos. Conecta Supabase para guardar cambios de forma permanente."*
+- Enriched synthetic dataset loaded from `src/lib/demo-data.ts`:
+  - **5 Owners:** Sofía Demo, Martín Demo, Camila Demo, Tomás Demo, Valentina Demo.
+  - **10 Dogs:** Rocky, Luna, Coco, Milo, Nala, Bruno, Kira, Simba, Toby, Maya.
+  - **12 Products:** Cuerda resistente, Zorro de felpa con sonido, Pelota de caucho, Premios de salmón, Bocaditos de pollo, Puzzle de snacks, Frisbee flexible, Bandana aventura, Mordedor de goma, Alfombra de olfato, Stick dental vegetal, Arnés ergonómico reflectante.
+  - **22 Product Interactions:** Varied reactions (loved, liked, neutral, disliked), ratings, favorites, durability metrics, and repurchase intent.
+  - **Structured Preferences:** 20+ queryable preferences spanning toys, treats, activities, and behaviors.
+  - **10 Friendships:** 6 accepted friendships, 3 pending requests (including incoming requests to Rocky and Luna for the viewer), and 1 declined relationship.
 - Form submissions display an informational message indicating demo state without throwing application errors.
 
 ---

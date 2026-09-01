@@ -21,7 +21,8 @@ export const es = {
     remove: "Eliminar",
   },
   demo: {
-    title: "Estás viendo la experiencia demo",
-    description: "Conecta Supabase para guardar cambios y probar cuentas reales.",
+    title: "Modo demo",
+    description:
+      "Estás explorando datos sintéticos. Conecta Supabase para guardar cambios de forma permanente.",
   },
 } as const;
