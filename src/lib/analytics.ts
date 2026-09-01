@@ -16,7 +16,22 @@ export type AnalyticsEvent =
   | "friendship_request_accepted"
   | "product_feedback_submitted"
   | "beta_feedback_opened"
-  | "beta_feedback_submitted";
+  | "beta_feedback_submitted"
+  | "nearby_opened"
+  | "nearby_location_enabled"
+  | "nearby_radius_changed"
+  | "map_opened"
+  | "match_opened"
+  | "match_liked"
+  | "match_passed"
+  | "match_created"
+  | "playdate_created"
+  | "playdate_invite_sent"
+  | "playdate_invite_accepted"
+  | "playdate_invite_declined"
+  | "conversation_started"
+  | "message_sent"
+  | "instagram_profile_opened";
 
 export type EventProperties = Record<string, string | number | boolean | null | undefined>;
 
