@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { ChatRoom } from "@/components/chat/chat-room";
 import { getOwnerDogs } from "@/lib/data/dogs";
@@ -10,10 +10,9 @@ type ConversationPageProps = {
   params: Promise<{ conversationId: string }>;
 };
 
-export async function generateMetadata({ params }: ConversationPageProps): Promise<Metadata> {
-  const { conversationId } = await params;
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `Conversación · Doggy World`,
+    title: "Conversación · Doggy World",
   };
 }
 

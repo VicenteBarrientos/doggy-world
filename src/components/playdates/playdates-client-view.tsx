@@ -1,18 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import {
   Calendar,
-  Check,
   Clock,
-  Dog as DogIcon,
-  HeartHandshake,
   LoaderCircle,
   MapPin,
   Plus,
   ShieldCheck,
-  Users,
   X,
 } from "lucide-react";
 

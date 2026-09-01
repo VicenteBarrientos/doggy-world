@@ -11,12 +11,21 @@ export function AppHeader() {
     <header className="sticky top-0 z-30 border-b-2 border-ink bg-cream px-4 py-3 sm:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <Logo />
-        <nav className="hidden items-center gap-2 lg:flex" aria-label="Cuenta">
+        <nav className="hidden items-center gap-1.5 lg:flex" aria-label="Cuenta">
           <Link href="/dashboard" className={buttonStyles({ variant: "ghost", size: "sm" })}>
             Inicio
           </Link>
-          <Link href="/products" className={buttonStyles({ variant: "ghost", size: "sm" })}>
-            Productos
+          <Link href="/nearby" className={buttonStyles({ variant: "ghost", size: "sm" })}>
+            Cerca
+          </Link>
+          <Link href="/match" className={buttonStyles({ variant: "ghost", size: "sm" })}>
+            Match 🐾
+          </Link>
+          <Link href="/playdates" className={buttonStyles({ variant: "ghost", size: "sm" })}>
+            Playdates
+          </Link>
+          <Link href="/messages" className={buttonStyles({ variant: "ghost", size: "sm" })}>
+            Mensajes
           </Link>
           <Link href="/friend-requests" className={buttonStyles({ variant: "ghost", size: "sm" })}>
             Amigos

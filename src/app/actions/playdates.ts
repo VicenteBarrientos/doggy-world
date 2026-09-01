@@ -113,7 +113,7 @@ export async function createPlaydateAction(
         city: parsed.data.city,
         location_label: parsed.data.locationLabel,
         meeting_point: null,
-        notes: parsed.data.notes,
+        notes: parsed.data.notes ?? null,
         status: "scheduled",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

@@ -5,7 +5,7 @@ import { requireViewer } from "@/lib/data/viewer";
 import { demoDogs } from "@/lib/demo-data";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
-import type { DogWithPhoto, PlaydateWithDetails } from "@/types/database";
+import type { DogWithPhoto, Playdate, PlaydateWithDetails } from "@/types/database";
 
 // In-memory synthetic playdates store for demo mode sessions
 const demoPlaydates: PlaydateWithDetails[] = [
@@ -135,7 +135,7 @@ export async function getDogPlaydates(dogId: string): Promise<{
         .order("starts_at", { ascending: true })
     : { data: [] };
 
-  const allPlaydatesMap = new Map<string, typeof hostPlaydates extends (infer T)[] ? T : never>();
+  const allPlaydatesMap = new Map<string, Playdate>();
   for (const p of [...(hostPlaydates || []), ...(participantPlaydates || [])]) {
     allPlaydatesMap.set(p.id, p);
   }

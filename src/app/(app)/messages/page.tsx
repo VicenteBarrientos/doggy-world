@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { MessageCircle, MessageSquarePlus } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 import { DogAvatar } from "@/components/dogs/dog-avatar";
 import { getOwnerDogs } from "@/lib/data/dogs";

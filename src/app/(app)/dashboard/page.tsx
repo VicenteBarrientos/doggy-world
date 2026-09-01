@@ -1,4 +1,14 @@
-import { Compass, Package, PawPrint, Plus, QrCode, Users } from "lucide-react";
+import {
+  Calendar,
+  Compass,
+  MapPin,
+  MessageCircle,
+  Package,
+  PawPrint,
+  Plus,
+  QrCode,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 
 import { DashboardDogCard } from "@/components/dogs/dashboard-dog-card";
@@ -101,6 +111,69 @@ export default async function DashboardPage() {
               completeness={completeness.get(dog.id) ?? 0}
             />
           ))}
+        </div>
+      </section>
+
+      {/* SOCIAL LAYER V1 SECTION */}
+      <section className="mt-14">
+        <div>
+          <span className="border border-ink bg-sun px-2 py-0.5 font-display text-[10px] uppercase tracking-widest text-ink shadow-[1px_1px_0_var(--ink)]">
+            Capa Social
+          </span>
+          <h2 className="mt-2 text-3xl">Conexiones y Vida Social</h2>
+        </div>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <Link
+            href="/nearby"
+            className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1 bg-white"
+          >
+            <span className="flex size-12 items-center justify-center border-2 border-ink bg-sun text-ink shadow-[2px_2px_0_var(--ink)]">
+              <MapPin size={22} />
+            </span>
+            <h3 className="mt-5 font-display text-xl uppercase">Perros Cerca</h3>
+            <p className="mt-2 text-xs leading-5 text-ink/75">
+              Explora el mapa interactivo y descubre pasaportes en tu zona.
+            </p>
+          </Link>
+
+          <Link
+            href="/match"
+            className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1 bg-white"
+          >
+            <span className="flex size-12 items-center justify-center border-2 border-ink bg-electric text-white shadow-[2px_2px_0_var(--ink)]">
+              <PawPrint size={22} />
+            </span>
+            <h3 className="mt-5 font-display text-xl uppercase">Doggy Match</h3>
+            <p className="mt-2 text-xs leading-5 text-ink/75">
+              Conecta con compañeros compatibles según energía y carácter.
+            </p>
+          </Link>
+
+          <Link
+            href="/playdates"
+            className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1 bg-white"
+          >
+            <span className="flex size-12 items-center justify-center border-2 border-ink bg-sun text-ink shadow-[2px_2px_0_var(--ink)]">
+              <Calendar size={22} />
+            </span>
+            <h3 className="mt-5 font-display text-xl uppercase">Playdates</h3>
+            <p className="mt-2 text-xs leading-5 text-ink/75">
+              Organiza paseos y juegos en lugares públicos y seguros.
+            </p>
+          </Link>
+
+          <Link
+            href="/messages"
+            className="edge-card group p-6 shadow-[6px_6px_0_var(--ink)] transition hover:-translate-y-1 bg-white"
+          >
+            <span className="flex size-12 items-center justify-center border-2 border-ink bg-cream-deep text-ink shadow-[2px_2px_0_var(--ink)]">
+              <MessageCircle size={22} />
+            </span>
+            <h3 className="mt-5 font-display text-xl uppercase">Mensajes 1:1</h3>
+            <p className="mt-2 text-xs leading-5 text-ink/75">
+              Chatea directamente con tus amigos y matches caninos.
+            </p>
+          </Link>
         </div>
       </section>
 

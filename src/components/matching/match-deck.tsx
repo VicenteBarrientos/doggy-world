@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Calendar,
-  Check,
   Heart,
   LoaderCircle,
   MapPin,
@@ -30,7 +29,7 @@ type MatchDeckProps = {
 };
 
 export function MatchDeck({ activeDog, initialCandidates }: MatchDeckProps) {
-  const [candidates, setCandidates] = useState(initialCandidates);
+  const candidates = initialCandidates;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [mutualMatchDog, setMutualMatchDog] = useState<MatchCandidateDog | null>(null);
   const [isPending, startTransition] = useTransition();

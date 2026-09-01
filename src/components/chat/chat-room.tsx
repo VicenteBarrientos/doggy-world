@@ -92,7 +92,7 @@ export function ChatRoom({
     startTransition(async () => {
       const res = await sendMessageAction({ status: "idle" }, fd);
       if (res.status === "error") {
-        setErrorMsg(res.message);
+        setErrorMsg(res.message ?? "Error al enviar mensaje");
         // Revert optimistic msg
         setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
       } else {

@@ -3,31 +3,37 @@ import { describe, expect, it } from "vitest";
 import { calculateMatchCompatibility } from "@/lib/match-heuristic";
 import { recordMatchAction } from "@/app/actions/matching";
 import { initialActionState } from "@/lib/forms";
+import type { Dog } from "@/types/database";
+
+type TestDogTraits = Pick<
+  Dog,
+  "energy_level" | "size" | "sociability" | "personality_tags" | "play_style"
+>;
 
 describe("Doggy Match Heuristic & Constraints", () => {
-  const socialLargeHigh = {
+  const socialLargeHigh: TestDogTraits = {
     energy_level: "high",
     size: "large",
     sociability: "social",
     personality_tags: ["playful", "fetch", "social"],
     play_style: "Correr y jugar",
-  } as const;
+  };
 
-  const identicalDog = {
+  const identicalDog: TestDogTraits = {
     energy_level: "high",
     size: "large",
     sociability: "social",
     personality_tags: ["playful", "fetch"],
     play_style: "Correr",
-  } as const;
+  };
 
-  const divergentDog = {
+  const divergentDog: TestDogTraits = {
     energy_level: "low",
     size: "small",
     sociability: "shy",
     personality_tags: ["calm"],
     play_style: "Dormir",
-  } as const;
+  };
 
   it("calculates high compatibility for similar dogs with shared tags", () => {
     const score = calculateMatchCompatibility(socialLargeHigh, identicalDog, 2);
