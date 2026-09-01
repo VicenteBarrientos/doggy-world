@@ -1,21 +1,21 @@
 "use client";
 
-import { AlertCircle, Camera, Check, Globe2, LoaderCircle, Lock, PawPrint, Save, Upload } from "lucide-react";
+import { AlertCircle, Camera, Check, Globe2, LoaderCircle, Lock, PawPrint, Save, Sparkles, Upload } from "lucide-react";
 import Image from "next/image";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { createDogAction, updateDogAction } from "@/app/actions/dogs";
 import { Button } from "@/components/ui/button";
 import { FieldError, FormStatus } from "@/components/ui/form-feedback";
 import {
   energyOptions,
-  maxDogPhotoBytes,
   personalityOptions,
   sizeOptions,
   sociabilityOptions,
 } from "@/lib/constants";
 import { initialActionState } from "@/lib/forms";
 import { track } from "@/lib/analytics";
+import { processDogPhoto } from "@/lib/client-photo";
 import type { DogWithPhoto } from "@/types/database";
 
 const inputClass =
@@ -25,48 +25,67 @@ export function DogForm({ dog }: { dog?: DogWithPhoto }) {
   const action = dog ? updateDogAction : createDogAction;
   const [state, formAction, pending] = useActionState(action, initialActionState);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-
-  const previewUrl = useMemo(
-    () => (photoFile ? URL.createObjectURL(photoFile) : dog?.photo_url ?? null),
-    [photoFile, dog?.photo_url],
+  const [photoPreview, setPhotoPreview] = useState<string | null>(dog?.photo_url ?? null);
+  const [photoState, setPhotoState] = useState<"idle" | "processing" | "ready" | "error">(
+    dog?.photo_url ? "ready" : "idle",
   );
+  const [photoStats, setPhotoStats] = useState<{
+    originalSize: number;
+    processedSize: number;
+  } | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   useEffect(() => {
     track("dog_creation_started", { is_edit: Boolean(dog) });
   }, [dog]);
 
   useEffect(() => {
-    if (!photoFile || !previewUrl) return;
-    return () => URL.revokeObjectURL(previewUrl);
-  }, [photoFile, previewUrl]);
+    return () => {
+      if (photoPreview && photoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
     setPhotoError(null);
     if (!file) {
-      setPhotoFile(null);
       return;
     }
 
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setPhotoError("Elige una foto en formato JPG, PNG o WebP.");
-      setPhotoFile(null);
-      return;
+    setPhotoState("processing");
+    try {
+      const processed = await processDogPhoto(file);
+      setPhotoFile(processed.file);
+      setPhotoPreview(processed.previewUrl);
+      setPhotoStats({
+        originalSize: processed.originalSize,
+        processedSize: processed.processedSize,
+      });
+      setPhotoState("ready");
+      track("dog_photo_uploaded", { size_kb: Math.round(processed.processedSize / 1024) });
+    } catch (err) {
+      setPhotoState("error");
+      const message =
+        err instanceof Error && err.message.includes("No pudimos")
+          ? err.message
+          : "No pudimos procesar esta foto. Intenta elegir otra imagen o guardarla como JPG.";
+      setPhotoError(message);
     }
-
-    if (file.size > maxDogPhotoBytes) {
-      setPhotoError("La foto pesa más de 3 MB. Por favor elige una imagen más liviana.");
-      setPhotoFile(null);
-      return;
-    }
-
-    setPhotoFile(file);
-    track("dog_photo_uploaded", { size_kb: Math.round(file.size / 1024) });
   }
 
   return (
-    <form action={formAction} className="space-y-6" noValidate>
+    <form
+      action={async (formData) => {
+        if (photoFile) {
+          formData.set("photo", photoFile);
+        }
+        return formAction(formData);
+      }}
+      className="space-y-6"
+      noValidate
+    >
       {dog ? <input type="hidden" name="id" value={dog.id} /> : null}
 
       {/* 1. FOTO DEL PERRO */}
@@ -78,21 +97,21 @@ export function DogForm({ dog }: { dog?: DogWithPhoto }) {
           <div>
             <h2 className="font-display text-2xl uppercase tracking-tight">Su mejor foto</h2>
             <p className="text-xs text-ink/75">
-              JPG, PNG o WebP · hasta 3 MB · Se verá en su pasaporte canónico
+              JPG, PNG, WebP o HEIC · Optimización automática para móviles · Se verá en su pasaporte canónico
             </p>
           </div>
         </div>
 
         <div className="mt-6 grid items-center gap-6 sm:grid-cols-[180px_1fr]">
           <div className="relative aspect-square overflow-hidden border-2 border-ink bg-cream-deep text-ink shadow-[4px_4px_0_var(--ink)]">
-            {previewUrl ? (
+            {photoPreview ? (
               <Image
-                src={previewUrl}
+                src={photoPreview}
                 alt="Vista previa de la foto"
                 fill
                 sizes="180px"
                 className="object-cover"
-                unoptimized={Boolean(photoFile)}
+                unoptimized={photoPreview.startsWith("blob:")}
               />
             ) : (
               <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center text-ink/40">
@@ -100,36 +119,70 @@ export function DogForm({ dog }: { dog?: DogWithPhoto }) {
                 <span className="font-display text-[10px] uppercase">Sin foto aún</span>
               </div>
             )}
+            {photoState === "processing" ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-cream/80 backdrop-blur-xs">
+                <LoaderCircle className="animate-spin text-electric" size={28} />
+                <span className="mt-2 font-display text-[11px] uppercase tracking-wider text-ink">
+                  Preparando foto…
+                </span>
+              </div>
+            ) : null}
           </div>
 
           <div className="space-y-3">
-            <label
-              htmlFor="photo"
-              className="inline-flex cursor-pointer items-center gap-2 border-2 border-ink bg-white px-5 py-3 font-display text-xs uppercase tracking-wider text-ink shadow-[3px_3px_0_var(--ink)] transition hover:-translate-y-0.5 hover:bg-sun"
-            >
-              <Upload size={16} />
-              {previewUrl ? "Cambiar foto" : "Elegir foto del perro"}
-            </label>
-            <input
-              id="photo"
-              name="photo"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="sr-only"
-              onChange={handleFileChange}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <label
+                htmlFor="photo"
+                className="inline-flex cursor-pointer items-center gap-2 border-2 border-ink bg-white px-5 py-3 font-display text-xs uppercase tracking-wider text-ink shadow-[3px_3px_0_var(--ink)] transition hover:-translate-y-0.5 hover:bg-sun disabled:opacity-50"
+              >
+                {photoState === "processing" ? (
+                  <LoaderCircle className="animate-spin" size={16} />
+                ) : (
+                  <Upload size={16} />
+                )}
+                {photoPreview ? "Cambiar foto" : "Elegir foto del perro"}
+              </label>
+              <input
+                id="photo"
+                name="photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+                className="sr-only"
+                onChange={handleFileChange}
+                disabled={photoState === "processing" || pending}
+              />
+            </div>
 
-            {photoFile ? (
-              <p className="flex items-center gap-1.5 text-xs font-semibold text-ink">
-                <Check size={16} className="text-electric" /> {photoFile.name} ({(photoFile.size / 1024 / 1024).toFixed(2)} MB)
+            {photoState === "processing" ? (
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-electric">
+                <LoaderCircle className="animate-spin" size={14} /> Preparando foto…
               </p>
-            ) : (
+            ) : null}
+
+            {photoState === "ready" && photoFile ? (
+              <div className="space-y-1">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-ink">
+                  <Check size={16} className="text-electric" /> Foto lista · {photoFile.name} (
+                  {(photoFile.size / 1024).toFixed(0)} KB)
+                </p>
+                {photoStats && photoStats.originalSize > photoStats.processedSize * 1.15 ? (
+                  <p className="flex items-center gap-1 text-[11px] text-ink/75">
+                    <Sparkles size={13} className="text-electric" /> Optimizada automáticamente desde{" "}
+                    {(photoStats.originalSize / 1024 / 1024).toFixed(1)} MB para carga rápida.
+                  </p>
+                ) : null}
+              </div>
+            ) : !photoPreview ? (
               <p className="text-xs text-ink/70">
-                {dog?.photo_url
-                  ? "Puedes mantener la foto actual o seleccionar una nueva."
-                  : "Una foto cuadrada o de retrato resaltará en su pasaporte y en la comunidad."}
+                Una foto cuadrada o de retrato tomada con tu teléfono resaltará en su pasaporte.
               </p>
-            )}
+            ) : null}
+
+            {pending ? (
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-electric">
+                <LoaderCircle className="animate-spin" size={14} /> Subiendo foto…
+              </p>
+            ) : null}
 
             {photoError ? (
               <p className="flex items-center gap-1.5 text-xs font-semibold text-danger" role="alert">

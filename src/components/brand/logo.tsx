@@ -8,12 +8,15 @@ export function Logo({ compact = false, className }: { compact?: boolean; classN
     <Link
       href="/"
       className={cn(
-        "inline-flex items-center gap-2.5 font-bold text-ink transition hover:opacity-90",
+        "inline-flex items-center gap-2 font-bold text-ink transition hover:opacity-90",
         className,
       )}
       aria-label="Doggy World, ir al inicio"
     >
       <Wordmark className={compact ? "text-lg" : "text-2xl"} />
+      <span className="border border-ink bg-sun px-1.5 py-0.5 font-display text-[9px] uppercase tracking-wider text-ink shadow-[1px_1px_0_var(--ink)]">
+        Beta
+      </span>
     </Link>
   );
 }

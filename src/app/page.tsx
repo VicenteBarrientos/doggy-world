@@ -33,19 +33,27 @@ const bentoFeatures = [
 const faqs = [
   {
     q: "¿Qué es Doggy World?",
-    a: "Un ecosistema digital centrado en la identidad de tu perro: su pasaporte digital, sus amigos, sus productos favoritos y su comunidad.",
+    a: "Un ecosistema digital centrado en la identidad persistente de tu perro: su pasaporte canónico, sus amigos, sus preferencias y sus productos favoritos.",
   },
   {
-    q: "¿Ya puedo usarlo?",
-    a: "Puedes explorar la versión demo interactiva, crear el pasaporte de tu perro y conocer las historias de otros perros de la comunidad.",
+    q: "¿Qué es el pasaporte?",
+    a: "Es la tarjeta de identidad oficial de tu perro en la web. Muestra su foto, raza, rasgos de personalidad, círculo de amigos caninos y un código QR único.",
   },
   {
-    q: "¿Tiene costo?",
-    a: "El pasaporte digital y la comunidad son totalmente gratuitos y de código abierto.",
+    q: "¿Quién puede verlo?",
+    a: "Cualquier persona con quien compartas su enlace o código QR. Si prefieres que sea privado, puedes desactivar la visibilidad pública en cualquier momento desde su edición.",
   },
   {
-    q: "¿Cómo se protege la privacidad de mi perro?",
-    a: "Tú decides qué mostrar. Los pasaportes públicos nunca revelan tu correo, tu dirección exacta ni ubicaciones en tiempo real.",
+    q: "¿Cómo comparto el perfil de mi perro?",
+    a: "Desde su pasaporte puedes pulsar 'Compartir pasaporte' para enviarlo por WhatsApp o redes sociales, o mostrar su código QR para que otro dueño lo escanee con su teléfono.",
+  },
+  {
+    q: "¿Puedo tener más de un perro?",
+    a: "¡Sí! Puedes registrar y gestionar los pasaportes de todos los perros de tu familia desde una sola cuenta en tu panel de control.",
+  },
+  {
+    q: "¿Cómo funciona la privacidad?",
+    a: "Tus datos personales están protegidos por diseño: tu correo electrónico, notas privadas y fotos en almacenamiento seguro nunca se exponen a terceros ni a visitantes anónimos.",
   },
 ];
 

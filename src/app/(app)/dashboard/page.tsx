@@ -2,6 +2,7 @@ import { Compass, Package, PawPrint, Plus, QrCode, Users } from "lucide-react";
 import Link from "next/link";
 
 import { DashboardDogCard } from "@/components/dogs/dashboard-dog-card";
+import { BetaFeedbackDialog } from "@/components/feedback/beta-feedback-dialog";
 import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
 import { buttonStyles } from "@/components/ui/button";
 import { getOwnerDog, getOwnerDogs } from "@/lib/data/dogs";
@@ -162,6 +163,22 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </section>
+
+      {/* FOOTER BETA & AYUDA */}
+      <footer className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t-2 border-ink pt-6 text-xs text-ink/70">
+        <div className="flex items-center gap-2">
+          <span className="border border-ink bg-sun px-1.5 py-0.5 font-display text-[9px] uppercase tracking-wider text-ink shadow-[1px_1px_0_var(--ink)]">
+            Beta Cerrada
+          </span>
+          <span>Doggy World para dueños reales</span>
+        </div>
+        <div className="flex items-center gap-5">
+          <Link href="/#faq" className="font-display text-xs uppercase tracking-wider text-ink/75 transition hover:text-electric">
+            Preguntas frecuentes
+          </Link>
+          <BetaFeedbackDialog triggerVariant="footer-link" />
+        </div>
+      </footer>
     </div>
   );
 }

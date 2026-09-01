@@ -231,6 +231,26 @@ export type Database = {
         >;
         Relationships: Relationship[];
       };
+      beta_feedback: {
+        Row: {
+          id: string;
+          user_id: string;
+          category: string;
+          message: string;
+          page_path: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string;
+          category?: string;
+          message: string;
+          page_path?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["beta_feedback"]["Insert"]>;
+        Relationships: Relationship[];
+      };
     };
     Views: Record<string, never>;
     Functions: {

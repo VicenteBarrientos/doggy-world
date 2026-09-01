@@ -14,7 +14,9 @@ export type AnalyticsEvent =
   | "passport_qr_opened"
   | "friendship_request_sent"
   | "friendship_request_accepted"
-  | "product_feedback_submitted";
+  | "product_feedback_submitted"
+  | "beta_feedback_opened"
+  | "beta_feedback_submitted";
 
 export type EventProperties = Record<string, string | number | boolean | null | undefined>;
 

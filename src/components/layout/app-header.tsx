@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { signOutAction } from "@/app/actions/auth";
 import { Logo } from "@/components/brand/logo";
+import { BetaFeedbackDialog } from "@/components/feedback/beta-feedback-dialog";
 import { Button, buttonStyles } from "@/components/ui/button";
 
 export function AppHeader() {
@@ -27,12 +28,15 @@ export function AppHeader() {
             Perfil
           </Link>
         </nav>
-        <form action={signOutAction}>
-          <Button variant="secondary" size="sm" type="submit">
-            <LogOut size={16} aria-hidden="true" />
-            <span className="hidden sm:inline">Salir</span>
-          </Button>
-        </form>
+        <div className="flex items-center gap-2.5">
+          <BetaFeedbackDialog triggerVariant="badge" />
+          <form action={signOutAction}>
+            <Button variant="secondary" size="sm" type="submit">
+              <LogOut size={16} aria-hidden="true" />
+              <span className="hidden sm:inline">Salir</span>
+            </Button>
+          </form>
+        </div>
       </div>
     </header>
   );
