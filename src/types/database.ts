@@ -391,6 +391,42 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["playdate_participants"]["Insert"]>;
         Relationships: Relationship[];
       };
+      dog_conversations: {
+        Row: {
+          id: string;
+          dog_a_id: string;
+          dog_b_id: string;
+          created_at: string;
+          last_message_at: string;
+        };
+        Insert: {
+          id?: string;
+          dog_a_id: string;
+          dog_b_id: string;
+          created_at?: string;
+          last_message_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["dog_conversations"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      dog_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          sender_dog_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          sender_dog_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["dog_messages"]["Insert"]>;
+        Relationships: Relationship[];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -477,8 +513,17 @@ export type Playdate =
   Database["public"]["Tables"]["playdates"]["Row"];
 export type PlaydateParticipant =
   Database["public"]["Tables"]["playdate_participants"]["Row"];
+export type DogConversation =
+  Database["public"]["Tables"]["dog_conversations"]["Row"];
+export type DogMessage =
+  Database["public"]["Tables"]["dog_messages"]["Row"];
 
 export type DogWithPhoto = Dog & { photo_url: string | null };
+
+export type ConversationListItem = DogConversation & {
+  other_dog: DogWithPhoto;
+  last_message: DogMessage | null;
+};
 
 export type PlaydateWithDetails = Playdate & {
   host_dog: DogWithPhoto;
