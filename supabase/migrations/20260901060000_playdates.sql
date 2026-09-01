@@ -32,7 +32,7 @@ alter table public.playdates enable row level security;
 alter table public.playdate_participants enable row level security;
 
 -- Helper function for RLS
-create or replace function public.is_playdate_participant(p_id uuid, u_id uuid)
+create or replace function public.is_playdate_host(p_id uuid, u_id uuid)
 returns boolean
 language sql
 security definer
@@ -43,17 +43,27 @@ as $$
     select 1 from public.playdates p
     join public.dogs d on d.id = p.host_dog_id
     where p.id = p_id and d.owner_id = u_id
-  ) or exists (
-    select 1 from public.playdate_participants pp
-    join public.dogs d on d.id = pp.dog_id
-    where pp.playdate_id = p_id and d.owner_id = u_id
   );
 $$;
+
+alter function public.is_playdate_host(uuid, uuid) owner to postgres;
 
 drop policy if exists playdates_select on public.playdates;
 create policy playdates_select on public.playdates
   for select
-  using (public.is_playdate_participant(id, auth.uid()));
+  using (
+    exists (
+      select 1 from public.dogs
+      where dogs.id = playdates.host_dog_id
+        and dogs.owner_id = auth.uid()
+    ) or
+    exists (
+      select 1 from public.playdate_participants pp
+      join public.dogs d on d.id = pp.dog_id
+      where pp.playdate_id = playdates.id
+        and d.owner_id = auth.uid()
+    )
+  );
 
 drop policy if exists playdates_insert on public.playdates;
 create policy playdates_insert on public.playdates
@@ -81,18 +91,20 @@ create policy playdates_update on public.playdates
 drop policy if exists playdate_participants_select on public.playdate_participants;
 create policy playdate_participants_select on public.playdate_participants
   for select
-  using (public.is_playdate_participant(playdate_id, auth.uid()));
+  using (
+    exists (
+      select 1 from public.dogs
+      where dogs.id = playdate_participants.dog_id
+        and dogs.owner_id = auth.uid()
+    ) or
+    public.is_playdate_host(playdate_id, auth.uid())
+  );
 
 drop policy if exists playdate_participants_insert on public.playdate_participants;
 create policy playdate_participants_insert on public.playdate_participants
   for insert
   with check (
-    exists (
-      select 1 from public.playdates p
-      join public.dogs d on d.id = p.host_dog_id
-      where p.id = playdate_participants.playdate_id
-        and d.owner_id = auth.uid()
-    )
+    public.is_playdate_host(playdate_participants.playdate_id, auth.uid())
   );
 
 drop policy if exists playdate_participants_update on public.playdate_participants;

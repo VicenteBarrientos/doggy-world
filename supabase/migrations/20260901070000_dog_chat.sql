@@ -78,7 +78,13 @@ $$;
 drop policy if exists dog_conversations_select on public.dog_conversations;
 create policy dog_conversations_select on public.dog_conversations
   for select
-  using (public.is_conversation_participant(id, auth.uid()));
+  using (
+    exists (
+      select 1 from public.dogs
+      where (dogs.id = dog_conversations.dog_a_id or dogs.id = dog_conversations.dog_b_id)
+        and dogs.owner_id = auth.uid()
+    )
+  );
 
 drop policy if exists dog_conversations_insert on public.dog_conversations;
 create policy dog_conversations_insert on public.dog_conversations
@@ -94,7 +100,14 @@ create policy dog_conversations_insert on public.dog_conversations
 drop policy if exists dog_messages_select on public.dog_messages;
 create policy dog_messages_select on public.dog_messages
   for select
-  using (public.is_conversation_participant(conversation_id, auth.uid()));
+  using (
+    exists (
+      select 1 from public.dog_conversations c
+      join public.dogs d on (d.id = c.dog_a_id or d.id = c.dog_b_id)
+      where c.id = dog_messages.conversation_id
+        and d.owner_id = auth.uid()
+    )
+  );
 
 drop policy if exists dog_messages_insert on public.dog_messages;
 create policy dog_messages_insert on public.dog_messages
@@ -104,8 +117,7 @@ create policy dog_messages_insert on public.dog_messages
       select 1 from public.dogs
       where id = dog_messages.sender_dog_id
         and owner_id = auth.uid()
-    ) and
-    public.is_conversation_participant(conversation_id, auth.uid())
+    )
   );
 
 grant select, insert on public.dog_conversations to authenticated;
