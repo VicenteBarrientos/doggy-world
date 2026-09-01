@@ -2,20 +2,50 @@
 
 ## Current Status
 
-The initial implementation budget for the previous coding agent ended just before committing and pushing the v0.1 MVP. The codebase has been fully inspected, verified, and secured:
+**Social Layer V1 is complete and deployed to production.**
 
-- **Codebase integrity:** Complete Next.js 16 App Router application with React 19, TypeScript, Tailwind CSS 4, and Supabase integration.
-- **Git status:** Recovered cleanly from working tree into branch `main`.
-- **Secrets check:** Confirmed no API keys, tokens, or credentials are hardcoded or tracked. `.env*` properly gitignored; `.env.example` contains only template placeholders.
-- **Verification:**
-  - `npm run lint` — PASSED (0 errors, 0 warnings).
-  - `npm run typecheck` — PASSED (0 TypeScript errors).
-  - `npm run test` — PASSED (5 test suites, 20/20 unit & component tests passing).
-  - `npm run build` — PASSED (production build compiled 17 routes cleanly).
-  - SQL/pgTAP — NOT EXECUTED (Docker Desktop daemon unavailable on host machine).
-- **Demo Mode:** Fully functional in deterministic demo fallback mode without Supabase credentials.
+- **Production URL:** https://doggy-world.vercel.app
+- **GitHub:** VicenteBarrientos/doggy-world (`main` @ `7430408`)
+- **Supabase project:** ugqblaoyfccozkjffoeg (hosted, fully migrated)
+
+### Verification status (all green)
+- `npm run lint` — PASSED (0 errors, 0 warnings)
+- `npm run typecheck` — PASSED (0 TypeScript errors)
+- `npm run test` — PASSED (13 test files, 52/52 tests passing)
+- `npm run build` — PASSED (26 routes compiled cleanly, including all Social Layer routes)
+- Synthetic Social Layer E2E — PASSED (all 5 phases verified on hosted Supabase)
 
 ---
+
+## Completed Milestones
+
+### Social Layer V1 (commits 586bc83 → 7430408)
+
+All 6 Social Layer features are live on production:
+
+| Feature | Route | Commit |
+|---|---|---|
+| Instagram profile field | Dog profile / Passport | `586bc83` |
+| Privacy-safe Nearby Dogs | `/nearby` | `36b385a` |
+| Interactive Leaflet Map | `/nearby` (list/map toggle) | `de9e772` |
+| Doggy Match (swipe + heuristic) | `/match` | `d3419f0` |
+| Playdates | `/playdates` | `400c38b` |
+| Realtime 1:1 Dog Chat | `/messages`, `/messages/[id]` | `04e6149` |
+| Navigation + Dashboard | Header, MobileNav, Dashboard | `6fcc71d` |
+| RLS policy fix (playdates/chat) | Migration sync | `7430408` |
+
+### Supabase migrations applied (in order)
+1. `20260901000000_initial_doggy_world.sql` — core schema
+2. `20260901010000_*` through `20260901020000_*` — beta/analytics/storage
+3. `20260901030000_dog_instagram.sql` — `instagram_handle` field
+4. `20260901040000_nearby_locations.sql` — PostGIS `dog_locations`, `get_nearby_dogs` RPC
+5. `20260901050000_dog_matching.sql` — `dog_match_actions`, `dog_matches`, mutual trigger
+6. `20260901060000_playdates.sql` — `playdates`, `playdate_participants`, `is_playdate_host()` SECURITY DEFINER
+7. `20260901070000_dog_chat.sql` — `dog_conversations`, `dog_messages`, Realtime publication
+
+---
+
+
 
 ## Product Scope (v0.1 MVP)
 
