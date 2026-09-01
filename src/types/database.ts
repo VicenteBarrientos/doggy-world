@@ -253,6 +253,30 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["beta_feedback"]["Insert"]>;
         Relationships: Relationship[];
       };
+      dog_locations: {
+        Row: {
+          id: string;
+          dog_id: string;
+          location: unknown;
+          nearby_enabled: boolean;
+          city: string | null;
+          location_label: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          dog_id: string;
+          location: unknown;
+          nearby_enabled?: boolean;
+          city?: string | null;
+          location_label?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["dog_locations"]["Insert"]>;
+        Relationships: Relationship[];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -264,6 +288,29 @@ export type Database = {
           slug: string;
           category: Database["public"]["Enums"]["product_category"];
           image_url: string | null;
+        }[];
+      };
+      get_nearby_dogs: {
+        Args: {
+          requesting_dog_id: string;
+          center_lat: number;
+          center_lng: number;
+          radius_km?: number;
+        };
+        Returns: {
+          dog_id: string;
+          name: string;
+          slug: string;
+          breed: string;
+          photo_path: string | null;
+          size: string;
+          energy_level: string;
+          sociability: string;
+          play_style: string | null;
+          city: string | null;
+          approx_lat: number;
+          approx_lng: number;
+          distance_km: number;
         }[];
       };
     };
@@ -304,8 +351,27 @@ export type DogProductInteraction =
   Database["public"]["Tables"]["dog_product_interactions"]["Row"];
 export type DogFriendship =
   Database["public"]["Tables"]["dog_friendships"]["Row"];
+export type DogLocation =
+  Database["public"]["Tables"]["dog_locations"]["Row"];
 
 export type DogWithPhoto = Dog & { photo_url: string | null };
+
+export type NearbyDog = {
+  dog_id: string;
+  name: string;
+  slug: string;
+  breed: string;
+  photo_path: string | null;
+  photo_url: string | null;
+  size: string;
+  energy_level: string;
+  sociability: string;
+  play_style: string | null;
+  city: string | null;
+  approx_lat: number;
+  approx_lng: number;
+  distance_km: number;
+};
 
 export type PublicDogProfile = DogWithPhoto & {
   preferences: DogPreference[];
