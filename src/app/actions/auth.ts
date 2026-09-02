@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { actionMessage, stringValue } from "@/lib/action-helpers";
-import { DEMO_COOKIE } from "@/lib/demo-cookie";
+import { DEMO_COOKIE, DEMO_COOKIE_CLEAR_OPTIONS } from "@/lib/demo-cookie";
 import { fieldErrorsFromZod, type ActionState } from "@/lib/forms";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -17,12 +17,7 @@ import { loginSchema, signUpSchema } from "@/lib/validation";
 async function clearDemoCookie() {
   const cookieStore = await cookies();
   try {
-    cookieStore.set(DEMO_COOKIE, "", {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 0,
-    });
+    cookieStore.set(DEMO_COOKIE, "", DEMO_COOKIE_CLEAR_OPTIONS);
   } catch {
     // Server Components cannot set cookies — the proxy handles cleanup there.
   }

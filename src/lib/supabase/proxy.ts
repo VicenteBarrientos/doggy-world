@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { DEMO_COOKIE, isDemoCookieSet } from "@/lib/demo-cookie";
+import { DEMO_COOKIE, DEMO_COOKIE_CLEAR_OPTIONS, isDemoCookieSet } from "@/lib/demo-cookie";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
 
@@ -62,12 +62,7 @@ export async function updateSession(request: NextRequest) {
   // the real session is unambiguous, then continue normally.
   if (user) {
     if (isDemoCookieSet(request.cookies)) {
-      response.cookies.set(DEMO_COOKIE, "", {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 0,
-      });
+      response.cookies.set(DEMO_COOKIE, "", DEMO_COOKIE_CLEAR_OPTIONS);
     }
 
     // Redirect authenticated users away from auth routes

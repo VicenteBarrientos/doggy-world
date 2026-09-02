@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { DEMO_COOKIE } from "@/lib/demo-cookie";
+import { DEMO_COOKIE, DEMO_COOKIE_CLEAR_OPTIONS } from "@/lib/demo-cookie";
 
 /**
  * POST /demo/exit
@@ -13,11 +13,6 @@ import { DEMO_COOKIE } from "@/lib/demo-cookie";
 export async function POST(request: Request) {
   const origin = new URL(request.url).origin;
   const response = NextResponse.redirect(new URL("/sign-up", origin), 303);
-  response.cookies.set(DEMO_COOKIE, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 0, // immediate expiry — deletes the cookie
-  });
+  response.cookies.set(DEMO_COOKIE, "", DEMO_COOKIE_CLEAR_OPTIONS);
   return response;
 }

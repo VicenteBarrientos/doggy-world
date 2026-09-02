@@ -30,6 +30,12 @@ export const DEMO_COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === "production",
 } as const;
 
+/** Must match set attributes or browsers keep the production Secure cookie. */
+export const DEMO_COOKIE_CLEAR_OPTIONS = {
+  ...DEMO_COOKIE_OPTIONS,
+  maxAge: 0,
+} as const;
+
 /**
  * Check whether the demo_mode cookie is present in a ReadonlyRequestCookies
  * instance (next/headers) or a Next.js RequestCookies (middleware).

@@ -27,6 +27,7 @@ import { redirect } from "next/navigation";
 
 import {
   DEMO_COOKIE,
+  DEMO_COOKIE_CLEAR_OPTIONS,
   DEMO_COOKIE_OPTIONS,
   DEMO_COOKIE_VALUE,
   isDemoCookieSet,
@@ -95,6 +96,14 @@ describe("Demo cookie constants", () => {
   it("cookie options do NOT include maxAge or expires (session cookie)", () => {
     expect((DEMO_COOKIE_OPTIONS as Record<string, unknown>).maxAge).toBeUndefined();
     expect((DEMO_COOKIE_OPTIONS as Record<string, unknown>).expires).toBeUndefined();
+  });
+
+  it("clear options match set attributes so production Secure cookies can expire", () => {
+    expect(DEMO_COOKIE_CLEAR_OPTIONS.maxAge).toBe(0);
+    expect(DEMO_COOKIE_CLEAR_OPTIONS.httpOnly).toBe(DEMO_COOKIE_OPTIONS.httpOnly);
+    expect(DEMO_COOKIE_CLEAR_OPTIONS.sameSite).toBe(DEMO_COOKIE_OPTIONS.sameSite);
+    expect(DEMO_COOKIE_CLEAR_OPTIONS.path).toBe(DEMO_COOKIE_OPTIONS.path);
+    expect(DEMO_COOKIE_CLEAR_OPTIONS.secure).toBe(DEMO_COOKIE_OPTIONS.secure);
   });
 });
 
