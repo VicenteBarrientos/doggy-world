@@ -2,25 +2,40 @@
 
 ## Current Status
 
-**Match card sex + interactive explicit-demo social actions are complete and live on production.**
+**Match distance + demo social mutations + POST demo-exit are live on production.**
 
 - **Production URL:** https://doggy-world.vercel.app
-- **GitHub:** VicenteBarrientos/doggy-world (`main` @ `a165200`)
-- **Vercel deployment:** `dpl_2geJkdQwt9iMQuRg4j9XbeW7VpgN` (Ready, aliased to production)
+- **GitHub:** VicenteBarrientos/doggy-world (`main` @ `8599fb2`)
+- **Vercel deployment:** `dpl_9ahNsUbkHjdMzkQhUfubkj1yu4Mg` (Ready, aliased to production)
 - **Supabase project:** ugqblaoyfccozkjffoeg (hosted, fully migrated)
 
 ### Verification status (all green)
-- `npm run test` — PASSED (19 test files, 84/84 tests)
-- Production E2E (live browser, 2026-09-01) — `/login` → `Ver demo` → `/match`:
-  - Match cards show `Macho` / `Hembra` (never raw `male` / `female`)
-  - `PASAR` advances to the next candidate without the global error boundary
-  - `ME GUSTA` succeeds and advances
-  - Liking Coco shows `¡Hicieron Match!`
-  - Demo banner stays visible; GET `/demo/exit` does not clear the cookie
-- Desktop 1280×900 and mobile 390×844 match cards both render the sex badge and action buttons
+- `npm run lint` — PASSED
+- `npm run typecheck` — PASSED
+- `npm run test` — PASSED (19 test files, 90/90 tests)
+- `npm run build` — PASSED (29 compiled routes)
+- Production E2E (live browser, 2026-09-01) — `/login` → `Ver demo` → social demo:
+  - Match shows `Macho`/`Hembra` and `A X km` (Bruno `Santiago · A 2,9 km`, Maya `Hembra` + `A 12,4 km`, Coco `Viña del Mar · A 98,4 km`)
+  - `PASAR` / `ME GUSTA` / `¡Hicieron Match!` work without the global error boundary
+  - Nearby list/map and visibility toggle work
+  - Playdate invite `Invitaciones 1` → `Próximos 2`
+  - Demo chat send works
+  - `POST /demo/exit` returns `303` + `Set-Cookie: demo_mode=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=lax`; curl then sees `/match` → `/login`
+
+### Match distance
+- Formatter: `formatApproxDistance()` in `src/lib/utils.ts` (Spanish comma, omit missing, `<1 km` → `A menos de 1 km`)
+- UI: city and distance share the existing MapPin chip (`Viña del Mar · A 98,4 km`)
+- Demo source: same haversine helper as Nearby (`getDemoApproxDistanceKm`)
+- Real source: owner `dog_locations.location` is read server-side only, then `get_nearby_dogs` RPC (max 50 km) supplies `distance_km`. Exact geography never reaches the browser.
+- Compatibility uses existing heuristic distance adjustment when a km value exists; weighting was not changed.
+
+### Demo cookie clear
+`Crear mi cuenta` remains POST-only. Clearing now uses `DEMO_COOKIE_CLEAR_OPTIONS` so production `Secure` cookies actually expire.
 
 ### Follow-up (not blocking)
-- `/discover` in explicit demo still reads hosted public dogs (those rows currently omit `sex`, so the badge is correctly hidden). `/nearby` never receives `sex` in `NearbyDog`, so it was left unchanged.
+- Nearby default demo center is Santiago Centro until the visitor uses GPS; Match uses the requesting dog's stored coords, so Bruno can be `~4,9 km` on Nearby and `A 2,9 km` on Match until the same origin is used. The helper is shared.
+- `/discover` in explicit demo still reads hosted public dogs (those rows currently omit `sex`).
+- No synthetic hosted test account was available for a real-auth Match distance E2E.
 - Next product milestone remains human beta sessions in `docs/BETA_TEST_PLAN.md`.
 
 ---
