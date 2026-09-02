@@ -19,11 +19,16 @@ import { MatchDeck } from "@/components/matching/match-deck";
 import { demoDogs } from "@/lib/demo-data";
 import type { MatchCandidateDog } from "@/types/database";
 
-function candidate(index: number, score: number): MatchCandidateDog {
+function candidate(
+  index: number,
+  score: number,
+  approxDistanceKm?: number,
+): MatchCandidateDog {
   return {
     ...demoDogs[index],
     photo_url: null,
     compatibility_score: score,
+    approx_distance_km: approxDistanceKm,
   };
 }
 
@@ -53,6 +58,26 @@ describe("MatchDeck", () => {
 
     expect(screen.getByText("Hembra")).toBeInTheDocument();
     expect(screen.queryByText("female")).not.toBeInTheDocument();
+  });
+
+  it("renders city and formatted approximate distance together", () => {
+    render(
+      <MatchDeck
+        activeDog={demoDogs[0]}
+        initialCandidates={[candidate(2, 91, 3.5)]}
+      />,
+    );
+
+    expect(screen.getByText(/Viña del Mar · A 3,5 km/)).toBeInTheDocument();
+  });
+
+  it("omits distance when the candidate has no approximate distance", () => {
+    render(
+      <MatchDeck activeDog={demoDogs[0]} initialCandidates={[candidate(2, 91)]} />,
+    );
+
+    expect(screen.getByText("Viña del Mar")).toBeInTheDocument();
+    expect(screen.queryByText(/A .* km/)).not.toBeInTheDocument();
   });
 
   it("keeps the current card visible and re-enables actions after an expected failure", async () => {

@@ -91,6 +91,17 @@ export function sexLabel(sex: Dog["sex"] | null | undefined) {
   return null;
 }
 
+export function formatApproxDistance(km: number | null | undefined) {
+  if (km == null || !Number.isFinite(km) || km < 0) return null;
+  if (km < 1) return "A menos de 1 km";
+
+  const rounded = Math.round(km * 10) / 10;
+  const formatted = new Intl.NumberFormat("es-CL", {
+    maximumFractionDigits: Number.isInteger(rounded) ? 0 : 1,
+  }).format(rounded);
+  return `A ${formatted} km`;
+}
+
 export function canonicalFriendshipPair(firstDogId: string, secondDogId: string) {
   if (firstDogId === secondDogId) {
     throw new Error("Un perro no puede agregarse a sí mismo.");

@@ -20,7 +20,7 @@ import { recordMatchAction } from "@/app/actions/matching";
 import { DogAvatar } from "@/components/dogs/dog-avatar";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
-import { formatAge, personalityLabel, sexLabel } from "@/lib/utils";
+import { formatAge, formatApproxDistance, personalityLabel, sexLabel } from "@/lib/utils";
 import type { DogWithPhoto, MatchCandidateDog } from "@/types/database";
 
 type MatchDeckProps = {
@@ -38,6 +38,8 @@ export function MatchDeck({ activeDog, initialCandidates }: MatchDeckProps) {
 
   const currentCandidate = candidates[currentIndex];
   const currentSex = sexLabel(currentCandidate?.sex);
+  const currentDistance = formatApproxDistance(currentCandidate?.approx_distance_km);
+  const locationLabel = [currentCandidate?.city, currentDistance].filter(Boolean).join(" · ");
 
   function handleAction(action: "like" | "pass") {
     if (!currentCandidate || isPending || submittingRef.current) return;
@@ -123,9 +125,9 @@ export function MatchDeck({ activeDog, initialCandidates }: MatchDeckProps) {
                     {currentCandidate.breed} · {formatAge(currentCandidate.birth_date)}
                   </p>
                 </div>
-                {currentCandidate.city ? (
+                {locationLabel ? (
                   <span className="flex items-center gap-1 border border-ink bg-cream px-2 py-0.5 font-display text-[11px] text-ink shadow-[1px_1px_0_var(--ink)]">
-                    <MapPin size={12} /> {currentCandidate.city}
+                    <MapPin size={12} /> {locationLabel}
                   </span>
                 ) : null}
               </div>

@@ -7,6 +7,7 @@ import {
   calculateProfileCompleteness,
   canonicalFriendshipPair,
   formatAge,
+  formatApproxDistance,
   sexLabel,
   slugify,
 } from "@/lib/utils";
@@ -62,5 +63,16 @@ describe("dog identity utilities", () => {
     expect(sexLabel("female")).toBe("Hembra");
     expect(sexLabel("unknown")).toBeNull();
     expect(sexLabel(null)).toBeNull();
+  });
+
+  it("formats approximate distances in Spanish and omits missing values", () => {
+    expect(formatApproxDistance(0.4)).toBe("A menos de 1 km");
+    expect(formatApproxDistance(0.9)).toBe("A menos de 1 km");
+    expect(formatApproxDistance(1.0)).toBe("A 1 km");
+    expect(formatApproxDistance(1.4)).toBe("A 1,4 km");
+    expect(formatApproxDistance(3.5)).toBe("A 3,5 km");
+    expect(formatApproxDistance(12.2)).toBe("A 12,2 km");
+    expect(formatApproxDistance(null)).toBeNull();
+    expect(formatApproxDistance(undefined)).toBeNull();
   });
 });

@@ -21,6 +21,13 @@ const demoDogCoordinates: Record<string, { lat: number; lng: number; city: strin
   "aaaaaaaa-0000-4000-8000-000000000000": { lat: -33.36, lng: -70.51, city: "Lo Barnechea" }, // Maya
 };
 
+export function getDemoApproxDistanceKm(fromDogId: string, toDogId: string) {
+  const from = demoDogCoordinates[fromDogId];
+  const to = demoDogCoordinates[toDogId];
+  if (!from || !to) return undefined;
+  return calculateHaversineKm(from.lat, from.lng, to.lat, to.lng);
+}
+
 function calculateHaversineKm(
   lat1: number,
   lon1: number,

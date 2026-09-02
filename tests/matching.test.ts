@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { calculateMatchCompatibility } from "@/lib/match-heuristic";
 import { recordMatchAction } from "@/app/actions/matching";
-import { recordDemoMatchAction } from "@/lib/data/matching";
+import { getMatchCandidates, recordDemoMatchAction } from "@/lib/data/matching";
+import { getDemoApproxDistanceKm } from "@/lib/data/nearby";
 import { demoDogs } from "@/lib/demo-data";
 import { initialActionState } from "@/lib/forms";
 import type { Dog } from "@/types/database";
@@ -68,5 +69,17 @@ describe("Doggy Match Heuristic & Constraints", () => {
 
   it("creates the deterministic demo mutual match with a reachable candidate", () => {
     expect(recordDemoMatchAction(demoDogs[0].id, demoDogs[2].id, "like")).toBe(true);
+  });
+
+  it("attaches varied demo haversine distances instead of a single fake value", async () => {
+    const candidates = await getMatchCandidates(demoDogs[0].id);
+    const distances = candidates
+      .map((candidate) => candidate.approx_distance_km)
+      .filter((value): value is number => typeof value === "number");
+
+    expect(candidates.length).toBeGreaterThan(1);
+    expect(distances).toHaveLength(candidates.length);
+    expect(new Set(distances).size).toBeGreaterThan(1);
+    expect(getDemoApproxDistanceKm(demoDogs[0].id, demoDogs[2].id)).toBeGreaterThan(1);
   });
 });

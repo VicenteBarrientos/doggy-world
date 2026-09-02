@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getNearbyDogs } from "@/lib/data/nearby";
+import { getDemoApproxDistanceKm, getNearbyDogs } from "@/lib/data/nearby";
 
 describe("Nearby Dogs & Privacy Rules", () => {
   it("returns nearby dogs within selected radius for demo user", async () => {
@@ -30,6 +30,23 @@ describe("Nearby Dogs & Privacy Rules", () => {
     for (const dog of dogs) {
       expect(dog.distance_km).toBeLessThanOrEqual(2);
     }
+  });
+
+  it("uses the same demo distance helper as Match for a shared pair", async () => {
+    const dogs = await getNearbyDogs({
+      requestingDogId: "11111111-1111-4111-8111-111111111111",
+      centerLat: -33.4312,
+      centerLng: -70.6125,
+      radiusKm: 15,
+    });
+    const bruno = dogs.find((dog) => dog.dog_id === "66666666-6666-4666-8666-666666666666");
+    expect(bruno).toBeDefined();
+    expect(bruno?.distance_km).toBe(
+      getDemoApproxDistanceKm(
+        "11111111-1111-4111-8111-111111111111",
+        "66666666-6666-4666-8666-666666666666",
+      ),
+    );
   });
 
   it("exposes only approximate coordinates, never exact raw coordinates", async () => {

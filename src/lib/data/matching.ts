@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getDemoApproxDistanceKm } from "@/lib/data/nearby";
 import { resolveDogPhoto } from "@/lib/data/photos";
 import { requireViewer } from "@/lib/data/viewer";
 import { demoDogs } from "@/lib/demo-data";
@@ -7,6 +8,76 @@ import { calculateMatchCompatibility } from "@/lib/match-heuristic";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import type { DogWithPhoto, MatchCandidateDog } from "@/types/database";
+
+type AppSupabaseClient = Awaited<ReturnType<typeof createClient>>;
+
+function parseOwnerGeoPoint(location: unknown): { lat: number; lng: number } | null {
+  if (!location) return null;
+
+  if (typeof location === "string") {
+    const match = location.match(/POINT\s*\(\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*\)/i);
+    if (!match) return null;
+    const lng = Number(match[1]);
+    const lat = Number(match[2]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    return { lat, lng };
+  }
+
+  if (typeof location !== "object") return null;
+  const value = location as {
+    coordinates?: unknown;
+    lat?: unknown;
+    lng?: unknown;
+    latitude?: unknown;
+    longitude?: unknown;
+  };
+
+  if (Array.isArray(value.coordinates) && value.coordinates.length >= 2) {
+    const lng = Number(value.coordinates[0]);
+    const lat = Number(value.coordinates[1]);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+  }
+
+  const lat = Number(value.lat ?? value.latitude);
+  const lng = Number(value.lng ?? value.longitude);
+  if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
+  return null;
+}
+
+async function getRealMatchDistances(
+  supabase: AppSupabaseClient,
+  requestingDogId: string,
+): Promise<Map<string, number>> {
+  const distances = new Map<string, number>();
+  const { data: ownLocation } = await supabase
+    .from("dog_locations")
+    .select("location")
+    .eq("dog_id", requestingDogId)
+    .maybeSingle();
+
+  const origin = parseOwnerGeoPoint(ownLocation?.location);
+  if (!origin) return distances;
+
+  const { data: rows, error } = await supabase.rpc("get_nearby_dogs", {
+    requesting_dog_id: requestingDogId,
+    center_lat: origin.lat,
+    center_lng: origin.lng,
+    radius_km: 50,
+  });
+
+  if (error) {
+    console.error("[Match Distance RPC Error]", error);
+    return distances;
+  }
+
+  for (const row of rows ?? []) {
+    if (typeof row.distance_km === "number" && Number.isFinite(row.distance_km)) {
+      distances.set(row.dog_id, row.distance_km);
+    }
+  }
+
+  return distances;
+}
 
 // In-memory demo actions store for demo mode sessions
 const demoMatchActions = new Set<string>(); // `${fromDogId}:${toDogId}`
@@ -41,11 +112,12 @@ export async function getMatchCandidates(dogId: string): Promise<MatchCandidateD
       if (!dog.is_public) continue;
       if (demoMatchActions.has(`${dogId}:${dog.id}`)) continue;
 
-      const score = calculateMatchCompatibility(requestingDog, dog);
+      const approxDistanceKm = getDemoApproxDistanceKm(requestingDog.id, dog.id);
+      const score = calculateMatchCompatibility(requestingDog, dog, approxDistanceKm);
       candidates.push({
         ...dog,
         compatibility_score: score,
-        approx_distance_km: 3.5,
+        approx_distance_km: approxDistanceKm,
       });
     }
 
@@ -82,15 +154,18 @@ export async function getMatchCandidates(dogId: string): Promise<MatchCandidateD
 
   if (!rawCandidates || rawCandidates.length === 0) return [];
 
+  const distances = await getRealMatchDistances(supabase, dogId);
   const candidates: MatchCandidateDog[] = [];
   for (const c of rawCandidates) {
     if (excludedIds.has(c.id)) continue;
 
-    const score = calculateMatchCompatibility(requestingDog, c);
+    const approxDistanceKm = distances.get(c.id);
+    const score = calculateMatchCompatibility(requestingDog, c, approxDistanceKm);
     candidates.push({
       ...c,
       photo_url: await resolveDogPhoto(c.photo_path),
       compatibility_score: score,
+      approx_distance_km: approxDistanceKm,
     });
   }
 
