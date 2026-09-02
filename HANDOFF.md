@@ -2,19 +2,26 @@
 
 ## Current Status
 
-**Explicit Public Demo Mode is complete and deployed to production.**
+**Match card sex + interactive explicit-demo social actions are complete and live on production.**
 
 - **Production URL:** https://doggy-world.vercel.app
-- **GitHub:** VicenteBarrientos/doggy-world (`main` @ `888f9d4`)
-- **Vercel deployment:** `dpl_Fjtitu1SDCUBJpBeW21VQesbyRvU`
+- **GitHub:** VicenteBarrientos/doggy-world (`main` @ `a165200`)
+- **Vercel deployment:** `dpl_2geJkdQwt9iMQuRg4j9XbeW7VpgN` (Ready, aliased to production)
 - **Supabase project:** ugqblaoyfccozkjffoeg (hosted, fully migrated)
 
 ### Verification status (all green)
-- `npm run lint` — PASSED (0 errors, 0 warnings)
-- `npm run typecheck` — PASSED (0 TypeScript errors)
-- `npm run test` — PASSED (14 test files, 65/65 tests passing)
-- `npm run build` — PASSED (28 routes compiled cleanly)
-- Production E2E (automated) — PASSED (12/12 checks verified against live production)
+- `npm run test` — PASSED (19 test files, 84/84 tests)
+- Production E2E (live browser, 2026-09-01) — `/login` → `Ver demo` → `/match`:
+  - Match cards show `Macho` / `Hembra` (never raw `male` / `female`)
+  - `PASAR` advances to the next candidate without the global error boundary
+  - `ME GUSTA` succeeds and advances
+  - Liking Coco shows `¡Hicieron Match!`
+  - Demo banner stays visible; GET `/demo/exit` does not clear the cookie
+- Desktop 1280×900 and mobile 390×844 match cards both render the sex badge and action buttons
+
+### Follow-up (not blocking)
+- `/discover` in explicit demo still reads hosted public dogs (those rows currently omit `sex`, so the badge is correctly hidden). `/nearby` never receives `sex` in `NearbyDog`, so it was left unchanged.
+- Next product milestone remains human beta sessions in `docs/BETA_TEST_PLAN.md`.
 
 ---
 
@@ -37,7 +44,7 @@ always `true`, so demo mode never fired for explicit visitors.
 ### Files Added
 - `src/lib/demo-cookie.ts` — `DEMO_COOKIE` constant, `isDemoCookieSet()`, session-cookie options (no maxAge)
 - `src/app/demo/route.ts` — `GET /demo`: sets cookie, redirects to `/dashboard`
-- `src/app/demo/exit/route.ts` — `GET /demo/exit`: clears cookie, redirects to `/sign-up`
+- `src/app/demo/exit/route.ts` — originally `GET /demo/exit`; later changed to `POST` only in `a165200` so Next.js prefetch cannot clear the demo cookie
 - `tests/demo-mode.test.ts` — 12 regression tests
 
 ### Files Changed
@@ -47,7 +54,7 @@ always `true`, so demo mode never fired for explicit visitors.
 - `src/app/actions/auth.ts` — clears demo cookie after successful login/signup
 - `src/app/auth/callback/route.ts` — clears demo cookie after OAuth callback
 - `src/components/layout/app-shell.tsx` — async; shows DemoBanner for both automatic and explicit demo
-- `src/components/layout/demo-banner.tsx` — added "Crear mi cuenta →" CTA linking to `/demo/exit`
+- `src/components/layout/demo-banner.tsx` — "Crear mi cuenta" is a POST form to `/demo/exit` (not a prefetchable GET link)
 - `src/lib/i18n/es.ts` — added `demo.exit` string
 - `src/app/(auth)/layout.tsx` — `Ver demo` href: `/dashboard` → `/demo`
 - `src/app/page.tsx` — `Explorar demo` href: `/dashboard` → `/demo`
@@ -60,7 +67,32 @@ always `true`, so demo mode never fired for explicit visitors.
 - `beta-feedback`, `dogs`, `friendships`, `preferences`, `profile`, `chat`, `matching`, `playdates`, `location` actions all guard through `requireActionUser()`
 - Real authenticated user always takes precedence and immediately clears stale demo cookie
 
+---
 
+## Match sex + demo social mutations (commits `5543e82`, `a165200`)
+
+### Issue 1 — sex missing from Match cards
+`dogs.sex` already existed. Match cards now render a Spanish badge via `sexLabel()`:
+`male` → `Macho`, `female` → `Hembra`, unknown/null omitted.
+The same helper is used on public Passport and `DogCard` (`/discover`).
+
+### Issue 2 — Pass/Like crashed explicit demo
+`recordMatchAction()` called `requireActionUser()` before checking `viewer.isDemo`, so demo mutations never reached `recordDemoMatchAction()` and the page hit `error.tsx` (`ALGO NO SALIÓ COMO ESPERÁBAMOS`).
+
+Invariant now:
+
+| Viewer | Mutation path |
+|---|---|
+| Explicit demo (`viewer.isDemo`) | Branch first. Synthetic/no-op. Zero hosted Supabase writes. Useful UI. |
+| Real user | `requireActionUser()` + ownership + RLS write. |
+
+Audited actions: matching, nearby/location, playdates, chat, friendships, product feedback, beta feedback.
+
+### Issue 3 — `Crear mi cuenta` prefetch cleared demo
+Next.js prefetched GET `/demo/exit`, which deleted `demo_mode` before Match. Exit is now POST-only; the banner submits a form.
+
+### Client Match error handling
+`MatchDeck.handleAction()` keeps the current card on `result.status === "error"`, shows an inline alert, re-enables buttons, and uses a submitting ref to prevent double submits. Ordinary action failures do not trip the global error boundary.
 
 ## Completed Milestones
 
